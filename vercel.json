@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/evaluations/generate",
+      "schedule": "0 22 * * 0"
+    }
+  ]
+}
