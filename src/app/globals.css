@@ -16,9 +16,9 @@
   --app-text: #0f172a;
   --app-text-muted: #64748b;
   --app-text-faint: #94a3b8;
-  --app-accent: #f59e0b;
-  --app-accent-hover: #d97706;
-  --app-accent-soft: rgba(245, 158, 11, 0.12);
+  --app-accent: #2563eb;
+  --app-accent-hover: #1d4ed8;
+  --app-accent-soft: rgba(37, 99, 235, 0.12);
   --app-success: #16a34a;
   --app-success-soft: rgba(22, 163, 74, 0.12);
   --app-danger: #dc2626;

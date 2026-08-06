@@ -71,7 +71,7 @@ export default async function HomePage() {
     <div className="space-y-8">
       <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 text-white sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
-        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-amber-500/25 blur-3xl" />
+        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-500/25 blur-3xl" />
         <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-slate-500/20 blur-3xl" />
 
         <div className="relative">
@@ -90,7 +90,7 @@ export default async function HomePage() {
                 className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/15 sm:inline-flex"
               >
                 <span>本日の日報がまだ入力されていません。</span>
-                <span className="flex shrink-0 items-center gap-1 rounded-full bg-app-accent px-3 py-1.5 font-semibold text-slate-900">
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-app-accent px-3 py-1.5 font-semibold text-white">
                   入力する <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>
@@ -111,7 +111,7 @@ export default async function HomePage() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-base font-semibold text-slate-900">メニュー</h2>
+        <h2 className="mb-3 text-base font-semibold text-app-text">メニュー</h2>
         <QuickLinks />
       </div>
     </div>
