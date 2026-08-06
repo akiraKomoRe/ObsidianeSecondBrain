@@ -8,10 +8,10 @@ export default async function LoginPage({
   const { redirectTo } = await searchParams;
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-app-bg">
       <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-slate-900 p-10 text-white lg:flex">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
-        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-slate-500/20 blur-3xl" />
 
         <div className="relative flex items-center gap-2.5">
@@ -38,14 +38,14 @@ export default async function LoginPage({
       <div className="flex w-full flex-col items-center justify-start px-6 pb-12 pt-20 lg:w-1/2 lg:justify-center lg:py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-app-text text-sm font-bold text-white">
               昭
             </div>
-            <p className="text-sm font-semibold text-slate-900">昭和建設工業</p>
+            <p className="text-sm font-semibold text-app-text">昭和建設工業</p>
           </div>
 
-          <h1 className="text-xl font-bold text-slate-900">ログイン</h1>
-          <p className="mt-1 text-sm text-slate-500">アカウントの情報を入力してください。</p>
+          <h1 className="text-xl font-bold text-app-text">ログイン</h1>
+          <p className="mt-1 text-sm text-app-text-muted">アカウントの情報を入力してください。</p>
           <LoginForm redirectTo={redirectTo ?? "/"} />
         </div>
       </div>
