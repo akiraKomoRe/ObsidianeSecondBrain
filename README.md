@@ -29,9 +29,11 @@ Phase 1 でできること:
    - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`（**絶対にブラウザに公開しない**）
 3. SQL Editor で以下を順番に実行する。
    - `supabase/migrations/0001_init.sql`（テーブル・RLSポリシー作成）
+   - `supabase/migrations/0002_manager_dashboard.sql`（上長・adminが部下のデータを閲覧できるRLSポリシー追加）
    - `supabase/seed.sql`（評価項目の初期データ投入。会社の実際の評価シートに合わせて内容を編集して構いません）
 4. Authentication > Users から、テスト用の従業員アカウントを作成する（メール/パスワード）。
    - サインアップ時に `profiles` テーブルへ自動でプロフィール行が作成されます（初期roleは `employee`）。
+   - 上長を試す場合は、Table Editor で該当ユーザーの `role` を `manager` に、部下となるユーザーの `manager_id` をその上長の `id` に手動で設定してください（roleやmanager_idを割り当てる管理画面はまだありません）。
 
 ### 2. 環境変数を設定する
 

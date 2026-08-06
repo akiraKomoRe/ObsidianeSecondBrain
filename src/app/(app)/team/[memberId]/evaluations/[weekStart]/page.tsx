@@ -1,24 +1,22 @@
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { getTeamMember } from "@/lib/team/get-team-member";
 import { EvaluationDetailView } from "@/components/reports/evaluation-detail-view";
 
-export default async function EvaluationDetailPage({
+export default async function TeamMemberEvaluationDetailPage({
   params,
 }: {
-  params: Promise<{ weekStart: string }>;
+  params: Promise<{ memberId: string; weekStart: string }>;
 }) {
-  const { weekStart } = await params;
-
+  const { memberId, weekStart } = await params;
+  const { member } = await getTeamMember(memberId);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const { data: evaluation } = await supabase
     .from("weekly_ai_evaluations")
     .select("*")
-    .eq("user_id", user!.id)
+    .eq("user_id", member.id)
     .eq("week_start", weekStart)
     .maybeSingle();
 
@@ -26,5 +24,5 @@ export default async function EvaluationDetailPage({
     notFound();
   }
 
-  return <EvaluationDetailView evaluation={evaluation} backHref="/evaluations" />;
+  return <EvaluationDetailView evaluation={evaluation} backHref={`/team/${member.id}/evaluations`} />;
 }

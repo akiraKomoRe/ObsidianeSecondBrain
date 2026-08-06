@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { NAV_ITEMS, isNavItemActive } from "@/app/(app)/nav-links";
+import { isNavItemActive, visibleNavItems } from "@/app/(app)/nav-links";
+import type { Profile } from "@/types/database";
 
-export function MobileTabBar() {
+export function MobileTabBar({ profile }: { profile: Profile }) {
   const pathname = usePathname();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-app-border bg-app-surface pb-[env(safe-area-inset-bottom)] md:hidden">
-      {NAV_ITEMS.map((item) => {
+      {visibleNavItems(profile.role).map((item) => {
         const active = isNavItemActive(pathname, item.href);
         const Icon = item.icon;
         return (

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 
-import { NAV_ITEMS, isNavItemActive } from "@/app/(app)/nav-links";
+import { isNavItemActive, visibleNavItems } from "@/app/(app)/nav-links";
 import { logout } from "@/lib/auth/actions";
 import type { Profile } from "@/types/database";
 
@@ -35,7 +35,7 @@ export function Sidebar({ profile }: { profile: Profile }) {
       </div>
 
       <nav className="flex flex-1 flex-col gap-0.5 px-3">
-        {NAV_ITEMS.map((item) => {
+        {visibleNavItems(profile.role).map((item) => {
           const active = isNavItemActive(pathname, item.href);
           const Icon = item.icon;
           return (

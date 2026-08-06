@@ -41,7 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </main>
 
-        <MobileTabBar />
+        <MobileTabBar profile={profile} />
       </div>
     </div>
   );
