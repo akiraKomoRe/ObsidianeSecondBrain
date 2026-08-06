@@ -9,7 +9,7 @@ import type { DailyReport } from "@/types/database";
 const initialState: DailyReportState = { error: null, success: false };
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm shadow-sm transition-colors focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10";
+  "mt-1.5 w-full rounded-xl border border-app-border px-3.5 py-2.5 text-sm text-app-text transition-colors focus:border-app-accent focus:outline-none focus:ring-2 focus:ring-app-accent/20";
 
 export function DailyReportForm({
   today,
@@ -39,11 +39,11 @@ export function DailyReportForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+      className="space-y-5 rounded-2xl border border-app-border bg-app-card p-5 sm:p-6"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="report_date" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="report_date" className="block text-sm font-medium text-app-text-muted">
             日付
           </label>
           <input
@@ -57,14 +57,14 @@ export function DailyReportForm({
         </div>
 
         <div>
-          <label htmlFor="work_hours" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="work_hours" className="block text-sm font-medium text-app-text-muted">
             工数（時間）
           </label>
           <div className="mt-1.5 flex items-center gap-2">
             <button
               type="button"
               onClick={() => adjustHours(-0.5)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 text-slate-500 transition-colors hover:bg-slate-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border text-app-text-muted transition-colors hover:bg-app-card-hover"
               aria-label="工数を減らす"
             >
               <Minus className="h-4 w-4" />
@@ -78,12 +78,12 @@ export function DailyReportForm({
               min={0}
               max={24}
               defaultValue={existingReport?.work_hours ?? ""}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm shadow-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+              className="w-full rounded-xl border border-app-border px-3 py-2.5 text-center text-sm text-app-text focus:border-app-accent focus:outline-none focus:ring-2 focus:ring-app-accent/20"
             />
             <button
               type="button"
               onClick={() => adjustHours(0.5)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 text-slate-500 transition-colors hover:bg-slate-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-border text-app-text-muted transition-colors hover:bg-app-card-hover"
               aria-label="工数を増やす"
             >
               <Plus className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function DailyReportForm({
       </div>
 
       <div>
-        <label htmlFor="work_content" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="work_content" className="block text-sm font-medium text-app-text-muted">
           作業内容
         </label>
         <textarea
@@ -108,7 +108,7 @@ export function DailyReportForm({
       </div>
 
       <div>
-        <label htmlFor="issues" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="issues" className="block text-sm font-medium text-app-text-muted">
           課題・気づき
         </label>
         <textarea
@@ -121,7 +121,7 @@ export function DailyReportForm({
       </div>
 
       <div>
-        <label htmlFor="tomorrow_plan" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="tomorrow_plan" className="block text-sm font-medium text-app-text-muted">
           明日の予定
         </label>
         <textarea
@@ -134,13 +134,13 @@ export function DailyReportForm({
       </div>
 
       {state.error ? (
-        <p className="flex items-start gap-1.5 text-sm text-red-600">
+        <p className="flex items-start gap-1.5 text-sm text-app-danger">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           {state.error}
         </p>
       ) : null}
       {state.success ? (
-        <p className="flex items-center gap-1.5 text-sm text-green-600">
+        <p className="flex items-center gap-1.5 text-sm text-app-success">
           <CheckCircle2 className="h-4 w-4 shrink-0" />
           保存しました。
         </p>
@@ -150,7 +150,7 @@ export function DailyReportForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-slate-900/10 transition-colors hover:bg-slate-700 disabled:opacity-50 sm:w-auto sm:shadow-none"
+          className="w-full rounded-xl bg-app-accent px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-app-accent/20 transition-colors hover:bg-app-accent-hover disabled:opacity-50 sm:w-auto sm:shadow-none"
         >
           {pending ? "保存中..." : "日報を保存"}
         </button>

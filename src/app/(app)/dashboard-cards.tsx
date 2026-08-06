@@ -18,16 +18,16 @@ export function ProgressStatCard({
   return (
     <Link
       href={href}
-      className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="flex flex-col justify-between rounded-2xl border border-app-border bg-app-card p-5 transition-colors hover:bg-app-card-hover"
     >
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">
+      <p className="text-sm font-medium text-app-text-muted">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-app-text">
         {value}
-        <span className="text-base font-medium text-slate-400"> / {target}件</span>
+        <span className="text-base font-medium text-app-text-faint"> / {target}件</span>
       </p>
-      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-app-border-soft">
         <div
-          className={`h-full rounded-full ${onTrack ? "bg-green-500" : "bg-amber-500"}`}
+          className={`h-full rounded-full ${onTrack ? "bg-app-success" : "bg-app-accent"}`}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -47,19 +47,19 @@ export function StatusStatCard({
   return (
     <Link
       href={href}
-      className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="flex flex-col justify-between rounded-2xl border border-app-border bg-app-card p-5 transition-colors hover:bg-app-card-hover"
     >
-      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="text-sm font-medium text-app-text-muted">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         <span
           className={`inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold ${
-            submitted ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-800"
+            submitted ? "bg-app-success-soft text-app-success" : "bg-app-accent-soft text-app-accent"
           }`}
         >
           {submitted ? "提出済み" : "未提出"}
         </span>
       </div>
-      <p className="mt-3 flex items-center gap-1 text-sm text-slate-400">
+      <p className="mt-3 flex items-center gap-1 text-sm text-app-text-faint">
         詳細を見る <ArrowRight className="h-3.5 w-3.5" />
       </p>
     </Link>
@@ -77,29 +77,29 @@ export function EvaluationStatCard({
 }) {
   const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
   const trendColor =
-    trend === "up" ? "text-green-600" : trend === "down" ? "text-red-500" : "text-slate-400";
+    trend === "up" ? "text-app-success" : trend === "down" ? "text-app-danger" : "text-app-text-faint";
 
   return (
     <Link
       href={href}
-      className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+      className="flex flex-col justify-between rounded-2xl border border-app-border bg-app-card p-5 transition-colors hover:bg-app-card-hover"
     >
-      <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-        <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+      <p className="flex items-center gap-1.5 text-sm font-medium text-app-text-muted">
+        <Sparkles className="h-3.5 w-3.5 text-app-accent" />
         直近のAI週次評価
       </p>
       {avgScore === null ? (
-        <p className="mt-2 text-sm text-slate-400">まだ評価がありません</p>
+        <p className="mt-2 text-sm text-app-text-faint">まだ評価がありません</p>
       ) : (
         <div className="mt-2 flex items-center gap-2">
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-2xl font-bold text-app-text">
             {avgScore.toFixed(1)}
-            <span className="text-base font-medium text-slate-400"> / 5</span>
+            <span className="text-base font-medium text-app-text-faint"> / 5</span>
           </p>
           {trend ? <TrendIcon className={`h-5 w-5 ${trendColor}`} strokeWidth={2.5} /> : null}
         </div>
       )}
-      <p className="mt-3 flex items-center gap-1 text-sm text-slate-400">
+      <p className="mt-3 flex items-center gap-1 text-sm text-app-text-faint">
         評価一覧を見る <ArrowRight className="h-3.5 w-3.5" />
       </p>
     </Link>
@@ -136,14 +136,14 @@ export function QuickLinks() {
           <Link
             key={link.href}
             href={link.href}
-            className="group flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            className="group flex flex-col gap-2 rounded-2xl border border-app-border bg-app-card p-5 transition-colors hover:bg-app-card-hover"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent">
               <Icon className="h-5 w-5" strokeWidth={2} />
             </div>
-            <p className="font-semibold text-slate-900">{link.label}</p>
-            <p className="text-sm text-slate-500">{link.description}</p>
-            <p className="mt-1 flex items-center gap-1 text-sm font-medium text-slate-700 group-hover:gap-2 transition-all">
+            <p className="font-semibold text-app-text">{link.label}</p>
+            <p className="text-sm text-app-text-muted">{link.description}</p>
+            <p className="mt-1 flex items-center gap-1 text-sm font-medium text-app-text transition-all group-hover:gap-2">
               開く <ArrowRight className="h-3.5 w-3.5" />
             </p>
           </Link>

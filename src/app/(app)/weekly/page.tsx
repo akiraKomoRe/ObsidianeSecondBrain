@@ -42,26 +42,26 @@ export default async function WeeklyPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-bold text-slate-900">週報入力</h1>
+      <h1 className="text-xl font-bold text-app-text">週報入力</h1>
 
-      <div className="flex items-center justify-between gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
+      <div className="flex items-center justify-between gap-2 rounded-full border border-app-border bg-app-card p-1.5">
         <Link
           href={`/weekly?week=${prevWeek}`}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-app-text-muted transition-colors hover:bg-app-card-hover hover:text-app-text"
           aria-label="前週"
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-slate-900">{formatWeekLabel(weekStart, weekEnd)}</span>
+          <span className="text-sm font-semibold text-app-text">{formatWeekLabel(weekStart, weekEnd)}</span>
           {isCurrentWeek ? (
-            <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-medium text-white">今週</span>
+            <span className="rounded-full bg-app-accent px-2 py-0.5 text-[11px] font-medium text-white">今週</span>
           ) : null}
         </div>
         {!isCurrentWeek ? (
           <Link
             href={`/weekly?week=${nextWeek}`}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-app-text-muted transition-colors hover:bg-app-card-hover hover:text-app-text"
             aria-label="翌週"
           >
             <ChevronRight className="h-4 w-4" />

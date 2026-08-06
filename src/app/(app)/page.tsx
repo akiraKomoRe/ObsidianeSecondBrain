@@ -69,29 +69,35 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-sm text-slate-500">{dateLabel}</p>
-        <h1 className="mt-1 text-xl font-bold text-slate-900">
-          {profile?.name ?? ""}さん、お疲れ様です
-        </h1>
-      </div>
+      <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 text-white sm:p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
+        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-amber-500/25 blur-3xl" />
+        <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-slate-500/20 blur-3xl" />
 
-      {todayReport ? (
-        <div className="flex items-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          本日の日報は提出済みです。
+        <div className="relative">
+          <p className="text-sm text-slate-300">{dateLabel}</p>
+          <h1 className="mt-1 text-xl font-bold sm:text-2xl">{profile?.name ?? ""}さん、お疲れ様です</h1>
+
+          <div className="mt-5">
+            {todayReport ? (
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                本日の日報は提出済みです。
+              </div>
+            ) : (
+              <Link
+                href="/daily"
+                className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/15 sm:inline-flex"
+              >
+                <span>本日の日報がまだ入力されていません。</span>
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-app-accent px-3 py-1.5 font-semibold text-slate-900">
+                  入力する <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            )}
+          </div>
         </div>
-      ) : (
-        <Link
-          href="/daily"
-          className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm font-medium text-amber-900 transition-colors hover:bg-amber-100"
-        >
-          <span>本日の日報がまだ入力されていません。</span>
-          <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-900 px-3 py-1.5 text-white">
-            入力する <ArrowRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
-      )}
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <ProgressStatCard

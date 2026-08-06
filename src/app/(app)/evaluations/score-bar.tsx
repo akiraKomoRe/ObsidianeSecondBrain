@@ -1,14 +1,14 @@
-function scoreColor(score: number): string {
-  if (score >= 4) return "bg-green-500";
-  if (score >= 3) return "bg-amber-500";
-  return "bg-red-500";
+export function scoreColorClass(score: number): string {
+  if (score >= 4) return "bg-app-success";
+  if (score >= 3) return "bg-app-accent";
+  return "bg-app-danger";
 }
 
 export function ScoreBar({ score, max = 5 }: { score: number; max?: number }) {
   const pct = Math.min(100, Math.max(0, (score / max) * 100));
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-      <div className={`h-full rounded-full ${scoreColor(score)}`} style={{ width: `${pct}%` }} />
+    <div className="h-2 w-full overflow-hidden rounded-full bg-app-border-soft">
+      <div className={`h-full rounded-full ${scoreColorClass(score)}`} style={{ width: `${pct}%` }} />
     </div>
   );
 }

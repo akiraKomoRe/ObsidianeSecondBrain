@@ -3,6 +3,26 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+
+  /* (app)/ shell tokens -- deliberately separate from --background/--foreground
+     above (which the login screen's own dark/light split panel relies on) so
+     restyling the logged-in app can never affect the login screen. */
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-card: #ffffff;
+  --app-card-hover: #f8fafc;
+  --app-border: #e2e8f0;
+  --app-border-soft: #f1f5f9;
+  --app-text: #0f172a;
+  --app-text-muted: #64748b;
+  --app-text-faint: #94a3b8;
+  --app-accent: #f59e0b;
+  --app-accent-hover: #d97706;
+  --app-accent-soft: rgba(245, 158, 11, 0.12);
+  --app-success: #16a34a;
+  --app-success-soft: rgba(22, 163, 74, 0.12);
+  --app-danger: #dc2626;
+  --app-danger-soft: rgba(220, 38, 38, 0.12);
 }
 
 @theme inline {
@@ -10,6 +30,23 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-noto-sans-jp), var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono);
+
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-card: var(--app-card);
+  --color-app-card-hover: var(--app-card-hover);
+  --color-app-border: var(--app-border);
+  --color-app-border-soft: var(--app-border-soft);
+  --color-app-text: var(--app-text);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-text-faint: var(--app-text-faint);
+  --color-app-accent: var(--app-accent);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-accent-soft: var(--app-accent-soft);
+  --color-app-success: var(--app-success);
+  --color-app-success-soft: var(--app-success-soft);
+  --color-app-danger: var(--app-danger);
+  --color-app-danger-soft: var(--app-danger-soft);
 }
 
 body {

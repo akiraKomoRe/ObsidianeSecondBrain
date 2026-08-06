@@ -20,17 +20,17 @@ export default async function EvaluationsPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900">
-          <Sparkles className="h-5 w-5 text-amber-500" />
+        <h1 className="flex items-center gap-2 text-xl font-bold text-app-text">
+          <Sparkles className="h-5 w-5 text-app-accent" />
           AI週次評価
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-app-text-muted">
           週報を提出するとAIがその週の日報・週報を読み、評価項目ごとのスコアとコメントを生成します。最終的な評価は上長が確認のうえ確定します。
         </p>
       </div>
 
       {!evaluations || evaluations.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-dashed border-app-border bg-app-card px-4 py-8 text-center text-sm text-app-text-muted">
           まだAI評価がありません。週報を提出すると生成されます。
         </p>
       ) : (
@@ -49,23 +49,23 @@ export default async function EvaluationsPage() {
                     : "flat";
             const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
             const trendColor =
-              trend === "up" ? "text-green-600" : trend === "down" ? "text-red-500" : "text-slate-400";
+              trend === "up" ? "text-app-success" : trend === "down" ? "text-app-danger" : "text-app-text-faint";
 
             return (
               <li key={evaluation.id}>
                 <Link
                   href={`/evaluations/${evaluation.week_start}`}
-                  className="block rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+                  className="block rounded-2xl border border-app-border bg-app-card p-4 transition-colors hover:bg-app-card-hover sm:p-5"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-app-text">
                       {formatWeekLabel(evaluation.week_start, evaluation.week_end)}
                     </p>
                     <div className="flex items-center gap-1.5">
                       {trend ? <TrendIcon className={`h-4 w-4 ${trendColor}`} strokeWidth={2.5} /> : null}
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="text-sm font-semibold text-app-text">
                         {avgScore !== null ? avgScore.toFixed(1) : "-"}
-                        <span className="font-normal text-slate-400"> / 5</span>
+                        <span className="font-normal text-app-text-faint"> / 5</span>
                       </span>
                     </div>
                   </div>
@@ -74,8 +74,8 @@ export default async function EvaluationsPage() {
                       <ScoreBar score={avgScore} />
                     </div>
                   ) : null}
-                  <p className="mt-3 line-clamp-2 text-sm text-slate-600">{evaluation.overall_summary}</p>
-                  <p className="mt-2 flex items-center gap-1 text-xs font-medium text-slate-400">
+                  <p className="mt-3 line-clamp-2 text-sm text-app-text-muted">{evaluation.overall_summary}</p>
+                  <p className="mt-2 flex items-center gap-1 text-xs font-medium text-app-text-faint">
                     詳細を見る <ArrowRight className="h-3 w-3" />
                   </p>
                 </Link>
