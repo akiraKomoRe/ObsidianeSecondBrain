@@ -1,69 +1,107 @@
-"use client";
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { isNavItemActive, visibleNavItems } from "@/app/(app)/nav-links";
-import { logout } from "@/lib/auth/actions";
-import type { Profile } from "@/types/database";
+// Simplified shadcn Sidebar block: this app's desktop sidebar is always
+// expanded (no collapse/rail toggle) and mobile uses a dedicated bottom tab
+// bar instead of the standard Sheet-based off-canvas drawer, so the
+// collapsible/cookie-persistence/keyboard-shortcut machinery of the
+// official block is intentionally left out.
 
-export function Sidebar({ profile }: { profile: Profile }) {
-  const pathname = usePathname();
-  const initial = profile.name ? profile.name.charAt(0) : profile.email.charAt(0);
-
+function SidebarProvider({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-app-border bg-app-surface md:flex">
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-app-text text-sm font-bold text-white">
-          昭
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-tight text-app-text">昭和建設工業</p>
-          <p className="truncate text-xs leading-tight text-app-text-muted">人事評価システム</p>
-        </div>
-      </div>
+    <div data-slot="sidebar-wrapper" className={cn("flex min-h-screen w-full", className)} {...props}>
+      {children}
+    </div>
+  );
+}
 
-      <div className="mx-4 mb-4 flex items-center gap-2.5 rounded-xl bg-app-card-hover px-3 py-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-sm font-semibold text-app-accent">
-          {initial}
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-app-text">{profile.name}さん</p>
-          <p className="truncate text-xs text-app-text-faint">{profile.email}</p>
-        </div>
-      </div>
-
-      <nav className="flex flex-1 flex-col gap-0.5 px-3">
-        {visibleNavItems(profile.role).map((item) => {
-          const active = isNavItemActive(pathname, item.href);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-app-accent-soft text-app-accent"
-                  : "text-app-text-muted hover:bg-app-card-hover hover:text-app-text"
-              }`}
-            >
-              <Icon className="h-4 w-4" strokeWidth={2} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <form action={logout} className="border-t border-app-border p-3">
-        <button
-          type="submit"
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-app-text-muted transition-colors hover:bg-app-card-hover hover:text-app-text"
-        >
-          <LogOut className="h-4 w-4" strokeWidth={2} />
-          ログアウト
-        </button>
-      </form>
+function Sidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
+  return (
+    <aside
+      data-slot="sidebar"
+      className={cn("hidden w-60 shrink-0 flex-col border-r border-app-border bg-app-surface md:flex", className)}
+      {...props}
+    >
+      {children}
     </aside>
   );
 }
+
+function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="sidebar-header" className={cn("flex flex-col gap-2 p-4", className)} {...props} />;
+}
+
+function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sidebar-content"
+      className={cn("flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-3", className)}
+      {...props}
+    />
+  );
+}
+
+function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sidebar-footer"
+      className={cn("flex flex-col gap-2 border-t border-app-border p-3", className)}
+      {...props}
+    />
+  );
+}
+
+function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
+  return <ul data-slot="sidebar-menu" className={cn("flex w-full min-w-0 flex-col gap-0.5", className)} {...props} />;
+}
+
+function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
+  return <li data-slot="sidebar-menu-item" className={cn("relative", className)} {...props} />;
+}
+
+const sidebarMenuButtonVariants = cva(
+  "flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors outline-none [&_svg]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      isActive: {
+        true: "bg-app-accent-soft text-app-accent",
+        false: "text-app-text-muted hover:bg-app-card-hover hover:text-app-text",
+      },
+    },
+    defaultVariants: {
+      isActive: false,
+    },
+  }
+);
+
+function SidebarMenuButton({
+  className,
+  isActive,
+  asChild = false,
+  ...props
+}: React.ComponentProps<"button"> & VariantProps<typeof sidebarMenuButtonVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "button";
+
+  return (
+    <Comp
+      data-slot="sidebar-menu-button"
+      data-active={isActive}
+      className={cn(sidebarMenuButtonVariants({ isActive, className }))}
+      {...props}
+    />
+  );
+}
+
+export {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+};

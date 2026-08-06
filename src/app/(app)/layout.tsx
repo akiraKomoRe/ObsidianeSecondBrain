@@ -2,16 +2,19 @@ import { LogOut } from "lucide-react";
 
 import { logout } from "@/lib/auth/actions";
 import { getCurrentProfile } from "@/lib/auth/current-user";
-import { Sidebar } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { MobileTabBar } from "@/components/ui/mobile-tab-bar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
   const initial = profile.name ? profile.name.charAt(0) : profile.email.charAt(0);
 
   return (
-    <div className="flex min-h-screen bg-app-bg text-app-text">
-      <Sidebar profile={profile} />
+    <SidebarProvider className="bg-app-bg text-app-text">
+      <AppSidebar profile={profile} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-app-border bg-app-surface/90 px-4 py-3 backdrop-blur md:hidden">
@@ -22,17 +25,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <p className="text-sm font-semibold text-app-text">昭和建設工業</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-app-accent-soft text-sm font-semibold text-app-accent">
-              {initial}
-            </div>
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>{initial}</AvatarFallback>
+            </Avatar>
             <form action={logout}>
-              <button
-                type="submit"
-                title="ログアウト"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-app-text-muted transition-colors hover:bg-app-card-hover hover:text-app-text"
-              >
+              <Button type="submit" title="ログアウト" variant="ghost" size="icon" className="rounded-full">
                 <LogOut className="h-4 w-4" strokeWidth={2} />
-              </button>
+              </Button>
             </form>
           </div>
         </header>
@@ -43,6 +42,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
         <MobileTabBar profile={profile} />
       </div>
-    </div>
+    </SidebarProvider>
   );
 }

@@ -3,7 +3,7 @@ import { Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireManagerOrAdmin } from "@/lib/team/get-team-member";
 import { formatDate, getWeekRange } from "@/lib/date/week";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/section-card";
 import { TeamMemberRow } from "./team-member-row";
 import type { TeamMemberSummary } from "@/lib/team/types";
 import type { Profile } from "@/types/database";

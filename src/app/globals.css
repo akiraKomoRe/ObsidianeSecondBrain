@@ -1,11 +1,12 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
 
   /* (app)/ shell tokens -- deliberately separate from --background/--foreground
-     above (which the login screen's own dark/light split panel relies on) so
+     above (which the login screen's own body wrapper falls back to) so
      restyling the logged-in app can never affect the login screen. */
   --app-bg: #f8fafc;
   --app-surface: #ffffff;
@@ -23,6 +24,32 @@
   --app-success-soft: rgba(22, 163, 74, 0.12);
   --app-danger: #dc2626;
   --app-danger-soft: rgba(220, 38, 38, 0.12);
+
+  /* shadcn/ui standard tokens, mapped onto the --app-* palette above so every
+     shadcn-generated component (bg-primary, text-muted-foreground, ...)
+     renders in the already-approved light theme + blue accent with zero
+     separate "shadcn palette" to maintain. See plan notes: --accent here is
+     shadcn's *neutral hover surface* semantic, not our brand accent color --
+     mapping it to --app-accent-soft would incorrectly tint every
+     ghost/outline hover state blue. */
+  --radius: 0.5rem;
+  --card: var(--app-card);
+  --card-foreground: var(--app-text);
+  --popover: var(--app-card);
+  --popover-foreground: var(--app-text);
+  --primary: var(--app-accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--app-card-hover);
+  --secondary-foreground: var(--app-text);
+  --muted: var(--app-border-soft);
+  --muted-foreground: var(--app-text-muted);
+  --accent: var(--app-card-hover);
+  --accent-foreground: var(--app-text);
+  --destructive: var(--app-danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--app-border);
+  --input: var(--app-border);
+  --ring: var(--app-accent);
 }
 
 @theme inline {
@@ -47,6 +74,28 @@
   --color-app-success-soft: var(--app-success-soft);
   --color-app-danger: var(--app-danger);
   --color-app-danger-soft: var(--app-danger-soft);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
 body {

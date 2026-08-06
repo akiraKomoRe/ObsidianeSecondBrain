@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTeamMember } from "@/lib/team/get-team-member";
 import { addWeeks, formatWeekLabel, getWeekRange } from "@/lib/date/week";
 import { ReportTimeline } from "@/components/reports/report-timeline";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/section-card";
 
 export default async function TeamMemberWeeklyPage({
   params,

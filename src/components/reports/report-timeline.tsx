@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { parseDate } from "@/lib/date/week";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/section-card";
 import type { DailyReport } from "@/types/database";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
