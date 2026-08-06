@@ -1,10 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 
 import { login, type LoginState } from "@/lib/auth/actions";
 
 const initialState: LoginState = { error: null };
+
+const inputClass =
+  "mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm shadow-sm transition-colors focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10";
 
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
   const [state, formAction, pending] = useActionState(login, initialState);
@@ -23,7 +27,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
           type="email"
           required
           autoComplete="email"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none"
+          className={inputClass}
         />
       </div>
 
@@ -37,18 +41,24 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
           type="password"
           required
           autoComplete="current-password"
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-slate-500 focus:outline-none"
+          className={inputClass}
         />
       </div>
 
-      {state.error ? <p className="text-sm text-red-600">{state.error}</p> : null}
+      {state.error ? (
+        <p className="flex items-start gap-1.5 text-sm text-red-600">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          {state.error}
+        </p>
+      ) : null}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 disabled:opacity-50"
       >
         {pending ? "ログイン中..." : "ログイン"}
+        {!pending ? <ArrowRight className="h-4 w-4" /> : null}
       </button>
     </form>
   );

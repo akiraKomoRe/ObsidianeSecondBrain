@@ -1,44 +1,49 @@
-import Link from "next/link";
+import { LogOut } from "lucide-react";
 
 import { logout } from "@/lib/auth/actions";
 import { getCurrentProfile } from "@/lib/auth/current-user";
-
-const NAV_ITEMS = [
-  { href: "/daily", label: "日報" },
-  { href: "/weekly", label: "週報" },
-  { href: "/evaluations", label: "AI週次評価" },
-];
+import { NavLinks } from "./nav-links";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
+  const initial = profile.name ? profile.name.charAt(0) : profile.email.charAt(0);
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">昭和建設工業 人事評価システム</p>
-            <p className="text-xs text-slate-500">{profile.name}さん（{profile.email}）</p>
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white">
+              昭
+            </div>
+            <div>
+              <p className="text-sm font-semibold leading-tight text-slate-900">昭和建設工業</p>
+              <p className="text-xs leading-tight text-slate-500">人事評価システム</p>
+            </div>
           </div>
-          <form action={logout}>
-            <button type="submit" className="text-sm text-slate-500 hover:text-slate-900">
-              ログアウト
-            </button>
-          </form>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 sm:flex">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-800">
+                {initial}
+              </div>
+              <p className="text-sm text-slate-600">{profile.name}さん</p>
+            </div>
+            <form action={logout}>
+              <button
+                type="submit"
+                title="ログアウト"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              >
+                <LogOut className="h-4 w-4" strokeWidth={2} />
+                <span className="hidden sm:inline">ログアウト</span>
+              </button>
+            </form>
+          </div>
         </div>
-        <nav className="mx-auto flex max-w-3xl gap-4 px-4 pb-2">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm text-slate-600 hover:text-slate-900 hover:underline"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <NavLinks />
       </header>
-      <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">{children}</main>
     </div>
   );
 }

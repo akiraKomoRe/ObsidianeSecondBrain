@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { addWeeks, formatWeekLabel, getWeekRange } from "@/lib/date/week";
@@ -40,22 +41,34 @@ export default async function WeeklyPage({
   const isCurrentWeek = weekStart === getWeekRange(new Date()).weekStart;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">週報入力</h2>
-        <div className="flex items-center gap-3 text-sm">
-          <Link href={`/weekly?week=${prevWeek}`} className="text-slate-500 hover:text-slate-900 hover:underline">
-            ← 前週
-          </Link>
-          <span className="font-medium text-slate-700">{formatWeekLabel(weekStart, weekEnd)}</span>
-          {!isCurrentWeek ? (
-            <Link href={`/weekly?week=${nextWeek}`} className="text-slate-500 hover:text-slate-900 hover:underline">
-              翌週 →
-            </Link>
-          ) : (
-            <span className="text-slate-300">翌週 →</span>
-          )}
+    <div className="space-y-5">
+      <h1 className="text-xl font-bold text-slate-900">週報入力</h1>
+
+      <div className="flex items-center justify-between gap-2 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
+        <Link
+          href={`/weekly?week=${prevWeek}`}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          aria-label="前週"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Link>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-slate-900">{formatWeekLabel(weekStart, weekEnd)}</span>
+          {isCurrentWeek ? (
+            <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-medium text-white">今週</span>
+          ) : null}
         </div>
+        {!isCurrentWeek ? (
+          <Link
+            href={`/weekly?week=${nextWeek}`}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            aria-label="翌週"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <div className="h-9 w-9" />
+        )}
       </div>
 
       <WeeklyReportForm

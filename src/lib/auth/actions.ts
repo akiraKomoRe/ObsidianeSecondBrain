@@ -9,7 +9,7 @@ export type LoginState = { error: string | null };
 export async function login(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirectTo") ?? "/daily");
+  const redirectTo = String(formData.get("redirectTo") ?? "/");
 
   if (!email || !password) {
     return { error: "メールアドレスとパスワードを入力してください。" };
@@ -22,7 +22,7 @@ export async function login(_prevState: LoginState, formData: FormData): Promise
     return { error: "ログインに失敗しました。メールアドレスまたはパスワードをご確認ください。" };
   }
 
-  redirect(redirectTo || "/daily");
+  redirect(redirectTo || "/");
 }
 
 export async function logout() {
