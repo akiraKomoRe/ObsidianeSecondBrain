@@ -11,6 +11,10 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // Node's --experimental-strip-types (used by `npm test`) resolves imports
+    // literally, so test files must import "./score.ts" with the extension.
+    // Safe here because noEmit is on -- tsc never rewrites these paths.
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
