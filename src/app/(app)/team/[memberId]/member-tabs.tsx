@@ -10,6 +10,7 @@ const TABS = [
   { suffix: "/daily", label: "日報" },
   { suffix: "/weekly", label: "週報" },
   { suffix: "/evaluations", label: "AI週次評価" },
+  { suffix: "/term", label: "期末評価" },
 ];
 
 export function MemberTabs({ memberId }: { memberId: string }) {

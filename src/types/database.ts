@@ -7,7 +7,10 @@ export type Profile = {
   id: string;
   email: string;
   name: string;
+  /** Permission level. Distinct from job_grade, which drives scoring weights. */
   role: UserRole;
+  /** Added in 0003. Decides the term-evaluation category weights. */
+  job_grade: JobGrade;
   department: string | null;
   manager_id: string | null;
   created_at: string;
@@ -66,6 +69,91 @@ export type WeeklyAiEvaluation = {
   generated_at: string;
 };
 
+// --- Term (半期) evaluation, see supabase/migrations/0003_term_evaluation.sql ---
+
+/** Job grade decides scoring weights, separately from the permission role. */
+export type JobGrade = "director" | "bucho" | "kacho" | "kakaricho" | "shunin" | "ippan";
+
+/** The three categories of 人事評価規程 第5条. */
+export type EvaluationCategory = "quantitative" | "behavioral" | "development";
+
+export type EvaluationPeriod = {
+  id: string;
+  year: number;
+  half: "H1" | "H2";
+  starts_on: string;
+  ends_on: string;
+  status: "open" | "closed";
+  created_at: string;
+};
+
+export type JobGradeWeights = {
+  job_grade: JobGrade;
+  quantitative: number;
+  behavioral: number;
+  development: number;
+};
+
+export type BehaviorGuideline = {
+  id: string;
+  sort_order: number;
+  title: string;
+  job_grade: JobGrade;
+  expected_behavior: string;
+};
+
+export type TermEvaluationStage = "goal_setting" | "midterm" | "final";
+export type TermEvaluationStatus = "draft" | "pending_approval" | "approved";
+
+export type TermEvaluation = {
+  id: string;
+  user_id: string;
+  period_id: string;
+  stage: TermEvaluationStage;
+  status: TermEvaluationStatus;
+  job_grade: JobGrade;
+  overall_self_comment: string | null;
+  overall_manager_comment: string | null;
+  submitted_for_approval_at: string | null;
+  approver_id: string | null;
+  approved_at: string | null;
+  /** Set when the manager releases results to the employee after the meeting. */
+  disclosed_at: string | null;
+  final_snapshot: unknown | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** A goal plus the employee's own inputs. Readable by the employee at any time. */
+export type TermEvaluationItem = {
+  id: string;
+  term_evaluation_id: string;
+  category: EvaluationCategory;
+  sort_order: number;
+  title: string;
+  expected_behavior: string | null;
+  midterm_progress: string | null;
+  midterm_self_score: number | null;
+  self_comment: string | null;
+  self_score: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/**
+ * The manager's marks. A separate table so RLS can hide them entirely until
+ * `term_evaluations.disclosed_at` is set -- policies gate rows, not columns.
+ */
+export type TermEvaluationMark = {
+  item_id: string;
+  term_evaluation_id: string;
+  manager_comment: string | null;
+  manager_score: number | null;
+  final_score: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -97,6 +185,42 @@ export type Database = {
         Row: WeeklyAiEvaluation;
         Insert: Partial<WeeklyAiEvaluation>;
         Update: Partial<WeeklyAiEvaluation>;
+        Relationships: [];
+      };
+      evaluation_periods: {
+        Row: EvaluationPeriod;
+        Insert: Partial<EvaluationPeriod>;
+        Update: Partial<EvaluationPeriod>;
+        Relationships: [];
+      };
+      job_grade_weights: {
+        Row: JobGradeWeights;
+        Insert: Partial<JobGradeWeights>;
+        Update: Partial<JobGradeWeights>;
+        Relationships: [];
+      };
+      behavior_guidelines: {
+        Row: BehaviorGuideline;
+        Insert: Partial<BehaviorGuideline>;
+        Update: Partial<BehaviorGuideline>;
+        Relationships: [];
+      };
+      term_evaluations: {
+        Row: TermEvaluation;
+        Insert: Partial<TermEvaluation>;
+        Update: Partial<TermEvaluation>;
+        Relationships: [];
+      };
+      term_evaluation_items: {
+        Row: TermEvaluationItem;
+        Insert: Partial<TermEvaluationItem>;
+        Update: Partial<TermEvaluationItem>;
+        Relationships: [];
+      };
+      term_evaluation_marks: {
+        Row: TermEvaluationMark;
+        Insert: Partial<TermEvaluationMark>;
+        Update: Partial<TermEvaluationMark>;
         Relationships: [];
       };
     };
