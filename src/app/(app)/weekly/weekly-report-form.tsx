@@ -5,6 +5,10 @@ import Link from "next/link";
 import { AlertCircle, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 
 import { submitWeeklyReport, type WeeklyReportState } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { DailyReport, WeeklyReport } from "@/types/database";
 
 const initialState: WeeklyReportState = { error: null, success: false };
@@ -25,7 +29,7 @@ export function WeeklyReportForm({
   const [state, formAction, pending] = useActionState(submitWeeklyReport, initialState);
 
   return (
-    <div className="space-y-5 rounded-2xl border border-app-border bg-app-card p-5 sm:p-6">
+    <Card className="gap-5 p-5 sm:p-6">
       <div>
         <h3 className="text-sm font-semibold text-app-text">
           {weekLabel} の日報 <span className="font-normal text-app-text-faint">（{dailyReports.length}件）</span>
@@ -50,22 +54,19 @@ export function WeeklyReportForm({
         <input type="hidden" name="week_start" value={weekStart} />
         <input type="hidden" name="week_end" value={weekEnd} />
 
-        <div>
-          <label htmlFor="self_reflection" className="block text-sm font-medium text-app-text-muted">
-            今週の振り返り
-          </label>
-          <textarea
+        <div className="space-y-1.5">
+          <Label htmlFor="self_reflection">今週の振り返り</Label>
+          <Textarea
             id="self_reflection"
             name="self_reflection"
             rows={4}
             defaultValue={existingReport?.self_reflection ?? ""}
             placeholder="今週の成果や課題、来週に向けて意識したいことなどを記入してください"
-            className="mt-1.5 w-full rounded-xl border border-app-border px-3.5 py-2.5 text-sm text-app-text transition-colors focus:border-app-accent focus:outline-none focus:ring-2 focus:ring-app-accent/20"
           />
         </div>
 
         {state.error ? (
-          <p className="flex items-start gap-1.5 text-sm text-app-danger">
+          <p className="flex items-start gap-1.5 text-sm text-destructive">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             {state.error}
           </p>
@@ -82,11 +83,7 @@ export function WeeklyReportForm({
           </div>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-app-accent px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-app-accent-hover disabled:opacity-60 sm:w-auto"
-        >
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -98,8 +95,8 @@ export function WeeklyReportForm({
               {existingReport?.submitted_at ? "週報を再提出してAI評価を更新" : "週報を提出してAI評価を生成"}
             </>
           )}
-        </button>
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 }
