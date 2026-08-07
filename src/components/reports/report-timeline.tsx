@@ -14,7 +14,7 @@ export function ReportTimeline({ reports }: { reports: DailyReport[] }) {
     return (
       <div>
         <h2 className="mb-3 text-base font-semibold text-app-text">これまでの日報</h2>
-        <p className="rounded-2xl border border-dashed border-app-border bg-app-card px-4 py-6 text-center text-sm text-app-text-muted">
+        <p className="rounded-lg border border-dashed border-app-border bg-app-card px-4 py-6 text-center text-sm text-app-text-muted">
           まだ日報がありません。
         </p>
       </div>

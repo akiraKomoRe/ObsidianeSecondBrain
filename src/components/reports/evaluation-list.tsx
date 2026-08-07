@@ -15,7 +15,7 @@ export function EvaluationList({
 }) {
   if (evaluations.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-app-border bg-app-card px-4 py-8 text-center text-sm text-app-text-muted">
+      <p className="rounded-lg border border-dashed border-app-border bg-app-card px-4 py-8 text-center text-sm text-app-text-muted">
         まだAI評価がありません。週報を提出すると生成されます。
       </p>
     );

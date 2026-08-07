@@ -1,9 +1,13 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowRight, CalendarRange, NotebookPen, Sparkles, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingDown, TrendingUp, Minus } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ScoreBar } from "@/app/(app)/evaluations/score-bar";
+import { formatWeekLabel } from "@/lib/date/week";
+import type { DailyReport } from "@/types/database";
 
 export function ProgressStatCard({
   label,
@@ -20,8 +24,8 @@ export function ProgressStatCard({
   const onTrack = value >= target;
 
   return (
-    <Link href={href} className="block">
-      <Card className="gap-2 p-5 transition-colors hover:bg-app-card-hover">
+    <Link href={href} className="block h-full">
+      <Card className="h-full gap-2 p-5 transition-colors hover:bg-app-card-hover">
         <p className="text-sm font-medium text-app-text-muted">{label}</p>
         <p className="mt-1 text-2xl font-bold text-app-text">
           {value}
@@ -43,8 +47,8 @@ export function StatusStatCard({
   href: string;
 }) {
   return (
-    <Link href={href} className="block">
-      <Card className="gap-2 p-5 transition-colors hover:bg-app-card-hover">
+    <Link href={href} className="block h-full">
+      <Card className="h-full gap-2 p-5 transition-colors hover:bg-app-card-hover">
         <p className="text-sm font-medium text-app-text-muted">{label}</p>
         <div className="mt-1 flex items-center gap-2">
           <Badge variant={submitted ? "success" : "accent"}>{submitted ? "提出済み" : "未提出"}</Badge>
@@ -71,8 +75,8 @@ export function EvaluationStatCard({
     trend === "up" ? "text-app-success" : trend === "down" ? "text-app-danger" : "text-app-text-faint";
 
   return (
-    <Link href={href} className="block">
-      <Card className="gap-2 p-5 transition-colors hover:bg-app-card-hover">
+    <Link href={href} className="block h-full">
+      <Card className="h-full gap-2 p-5 transition-colors hover:bg-app-card-hover">
         <p className="flex items-center gap-1.5 text-sm font-medium text-app-text-muted">
           <Sparkles className="h-3.5 w-3.5 text-app-accent" />
           直近のAI週次評価
@@ -96,47 +100,80 @@ export function EvaluationStatCard({
   );
 }
 
-const QUICK_LINKS = [
-  {
-    href: "/daily",
-    icon: NotebookPen,
-    label: "日報",
-    description: "今日の作業内容を記録する",
-  },
-  {
-    href: "/weekly",
-    icon: CalendarRange,
-    label: "週報",
-    description: "週の振り返りを提出してAI評価を生成する",
-  },
-  {
-    href: "/evaluations",
-    icon: Sparkles,
-    label: "AI週次評価",
-    description: "AIが生成した週ごとの評価を確認する",
-  },
-];
-
-export function QuickLinks() {
+// Section shell shared by the two dashboard panels below: a titled header with
+// a "see all" link, over a list body.
+function PanelCard({
+  title,
+  href,
+  children,
+}: {
+  title: string;
+  href: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      {QUICK_LINKS.map((link) => {
-        const Icon = link.icon;
-        return (
-          <Link key={link.href} href={link.href} className="group block">
-            <Card className="gap-2 p-5 transition-colors hover:bg-app-card-hover">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent">
-                <Icon className="h-5 w-5" strokeWidth={2} />
-              </div>
-              <p className="mt-1 font-semibold text-app-text">{link.label}</p>
-              <p className="text-sm text-app-text-muted">{link.description}</p>
-              <p className="mt-1 flex items-center gap-1 text-sm font-medium text-app-text transition-all group-hover:gap-2">
-                開く <ArrowRight className="h-3.5 w-3.5" />
+    <Card className="gap-0 py-0">
+      <div className="flex items-center justify-between gap-3 border-b border-app-border px-5 py-3.5">
+        <h2 className="text-md font-semibold text-app-text">{title}</h2>
+        <Link href={href} className="text-sm font-medium text-app-accent hover:underline">
+          すべて見る
+        </Link>
+      </div>
+      {children}
+    </Card>
+  );
+}
+
+export function RecentReports({ reports }: { reports: DailyReport[] }) {
+  return (
+    <PanelCard title="直近の日報" href="/daily">
+      {reports.length === 0 ? (
+        <p className="px-5 py-10 text-center text-sm text-app-text-muted">まだ日報がありません。</p>
+      ) : (
+        <ul className="divide-y divide-app-border-soft">
+          {reports.map((report) => (
+            <li key={report.id} className="flex items-baseline gap-3 px-5 py-3">
+              <time className="w-24 shrink-0 text-xs font-medium text-app-text-muted">{report.report_date}</time>
+              <p className="min-w-0 flex-1 truncate text-sm text-app-text">
+                {report.work_content || "(内容なし)"}
               </p>
-            </Card>
-          </Link>
-        );
-      })}
-    </div>
+              {report.work_hours !== null ? (
+                <span className="tabular shrink-0 text-xs font-medium text-app-accent">{report.work_hours}h</span>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </PanelCard>
+  );
+}
+
+export function ScoreTrend({
+  items,
+}: {
+  items: { weekStart: string; weekEnd: string; avgScore: number | null }[];
+}) {
+  return (
+    <PanelCard title="AI評価の推移" href="/evaluations">
+      {items.length === 0 ? (
+        <p className="px-5 py-10 text-center text-sm text-app-text-muted">まだ評価がありません。</p>
+      ) : (
+        <ul className="space-y-3.5 px-5 py-4">
+          {items.map((item) => (
+            <li key={item.weekStart} className="space-y-1.5">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs text-app-text-muted">
+                  {formatWeekLabel(item.weekStart, item.weekEnd)}
+                </span>
+                <span className="tabular text-sm font-semibold text-app-text">
+                  {item.avgScore !== null ? item.avgScore.toFixed(1) : "-"}
+                </span>
+              </div>
+              {item.avgScore !== null ? <ScoreBar score={item.avgScore} /> : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </PanelCard>
   );
 }

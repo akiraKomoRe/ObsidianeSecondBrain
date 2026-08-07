@@ -35,11 +35,11 @@ export function WeeklyReportForm({
           {weekLabel} の日報 <span className="font-normal text-app-text-faint">（{dailyReports.length}件）</span>
         </h3>
         {dailyReports.length === 0 ? (
-          <p className="mt-2 rounded-xl border border-dashed border-app-border px-3 py-4 text-center text-sm text-app-text-muted">
+          <p className="mt-2 rounded-lg border border-dashed border-app-border px-3 py-4 text-center text-sm text-app-text-muted">
             この週の日報はまだありません。
           </p>
         ) : (
-          <ul className="mt-2 divide-y divide-app-border overflow-hidden rounded-xl border border-app-border">
+          <ul className="mt-2 divide-y divide-app-border overflow-hidden rounded-lg border border-app-border">
             {dailyReports.map((r) => (
               <li key={r.id} className="px-3.5 py-3 text-sm text-app-text">
                 <p className="font-medium text-app-text">{r.report_date}</p>
@@ -72,7 +72,7 @@ export function WeeklyReportForm({
           </p>
         ) : null}
         {state.success && !state.error ? (
-          <div className="flex items-start justify-between gap-3 rounded-xl border border-app-success/30 bg-app-success-soft px-3.5 py-3 text-sm text-app-success">
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-app-success/30 bg-app-success-soft px-3.5 py-3 text-sm text-app-success">
             <span className="flex items-start gap-1.5">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
               週報を提出し、AI評価を生成しました。

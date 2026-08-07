@@ -20,7 +20,7 @@ export function MobileTabBar({ profile }: { profile: Profile }) {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-medium transition-colors",
+              "flex flex-1 flex-col items-center gap-1 rounded-lg py-2 text-[11px] font-medium transition-colors",
               active ? "bg-app-accent-soft text-app-accent" : "text-app-text-faint"
             )}
           >

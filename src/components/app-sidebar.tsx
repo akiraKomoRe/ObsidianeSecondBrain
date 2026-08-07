@@ -27,7 +27,7 @@ export function AppSidebar({ profile }: { profile: Profile }) {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2.5 px-1 py-1">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-app-text text-sm font-bold text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-text text-sm font-bold text-white">
             昭
           </div>
           <div className="min-w-0">
@@ -36,7 +36,7 @@ export function AppSidebar({ profile }: { profile: Profile }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 rounded-xl bg-app-card-hover px-3 py-2.5">
+        <div className="flex items-center gap-2.5 rounded-lg bg-app-card-hover px-3 py-2.5">
           <Avatar className="h-8 w-8">
             <AvatarFallback>{initial}</AvatarFallback>
           </Avatar>

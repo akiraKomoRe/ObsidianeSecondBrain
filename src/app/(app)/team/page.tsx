@@ -73,7 +73,7 @@ export default async function TeamPage() {
       </div>
 
       {summaries.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-app-border bg-app-card px-4 py-8 text-center text-sm text-app-text-muted">
+        <p className="rounded-lg border border-dashed border-app-border bg-app-card px-4 py-8 text-center text-sm text-app-text-muted">
           表示できるメンバーがいません。
         </p>
       ) : (

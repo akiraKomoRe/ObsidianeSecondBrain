@@ -4,7 +4,14 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, getWeekRange } from "@/lib/date/week";
 import { clampToToday, countWeekdays } from "@/lib/date/business-days";
-import { EvaluationStatCard, ProgressStatCard, QuickLinks, StatusStatCard } from "./dashboard-cards";
+import { Button } from "@/components/ui/button";
+import {
+  EvaluationStatCard,
+  ProgressStatCard,
+  RecentReports,
+  ScoreTrend,
+  StatusStatCard,
+} from "./dashboard-cards";
 
 const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -21,33 +28,44 @@ export default async function HomePage() {
   const { weekStart, weekEnd } = getWeekRange(today);
   const weekdayTarget = countWeekdays(weekStart, clampToToday(weekEnd, today));
 
-  const [{ data: weekDailyReports }, { data: todayReport }, { data: weeklyReport }, { data: recentEvaluations }] =
-    await Promise.all([
-      supabase
-        .from("daily_reports")
-        .select("id")
-        .eq("user_id", user!.id)
-        .gte("report_date", weekStart)
-        .lte("report_date", weekEnd),
-      supabase
-        .from("daily_reports")
-        .select("id")
-        .eq("user_id", user!.id)
-        .eq("report_date", todayStr)
-        .maybeSingle(),
-      supabase
-        .from("weekly_reports")
-        .select("submitted_at")
-        .eq("user_id", user!.id)
-        .eq("week_start", weekStart)
-        .maybeSingle(),
-      supabase
-        .from("weekly_ai_evaluations")
-        .select("week_start, criteria_scores")
-        .eq("user_id", user!.id)
-        .order("week_start", { ascending: false })
-        .limit(2),
-    ]);
+  const [
+    { data: weekDailyReports },
+    { data: todayReport },
+    { data: weeklyReport },
+    { data: recentEvaluations },
+    { data: latestReports },
+  ] = await Promise.all([
+    supabase
+      .from("daily_reports")
+      .select("id")
+      .eq("user_id", user!.id)
+      .gte("report_date", weekStart)
+      .lte("report_date", weekEnd),
+    supabase
+      .from("daily_reports")
+      .select("id")
+      .eq("user_id", user!.id)
+      .eq("report_date", todayStr)
+      .maybeSingle(),
+    supabase
+      .from("weekly_reports")
+      .select("submitted_at")
+      .eq("user_id", user!.id)
+      .eq("week_start", weekStart)
+      .maybeSingle(),
+    supabase
+      .from("weekly_ai_evaluations")
+      .select("week_start, week_end, criteria_scores")
+      .eq("user_id", user!.id)
+      .order("week_start", { ascending: false })
+      .limit(5),
+    supabase
+      .from("daily_reports")
+      .select("*")
+      .eq("user_id", user!.id)
+      .order("report_date", { ascending: false })
+      .limit(6),
+  ]);
 
   const avgOf = (scores: { score: number }[]) =>
     scores.length ? scores.reduce((sum, s) => sum + s.score, 0) / scores.length : null;
@@ -67,36 +85,37 @@ export default async function HomePage() {
     WEEKDAY_LABELS[today.getDay()]
   }）`;
 
+  const trendItems = (recentEvaluations ?? []).map((evaluation) => ({
+    weekStart: evaluation.week_start,
+    weekEnd: evaluation.week_end,
+    avgScore: avgOf(evaluation.criteria_scores),
+  }));
+
   return (
-    <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 text-white sm:p-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800" />
-        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
-        <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-slate-500/20 blur-3xl" />
-
-        <div className="relative">
-          <p className="text-sm text-slate-300">{dateLabel}</p>
-          <h1 className="mt-1 text-xl font-bold sm:text-2xl">{profile?.name ?? ""}さん、お疲れ様です</h1>
-
-          <div className="mt-5">
-            {todayReport ? (
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                本日の日報は提出済みです。
-              </div>
-            ) : (
-              <Link
-                href="/daily"
-                className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-4 py-3.5 text-sm font-medium text-white transition-colors hover:bg-white/15 sm:inline-flex"
-              >
-                <span>本日の日報がまだ入力されていません。</span>
-                <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 font-semibold text-white">
-                  入力する <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
-            )}
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-app-border pb-5">
+        <div>
+          <time className="text-sm text-app-text-muted">{dateLabel}</time>
+          <h1 className="mt-0.5 text-xl font-bold text-app-text">
+            {profile?.name ?? ""}さん、お疲れ様です
+          </h1>
         </div>
+
+        {todayReport ? (
+          <p className="flex items-center gap-1.5 text-sm font-medium text-app-success">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            本日の日報は提出済みです
+          </p>
+        ) : (
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-app-text-muted">本日の日報が未入力です</p>
+            <Button asChild size="sm">
+              <Link href="/daily">
+                入力する <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -110,9 +129,9 @@ export default async function HomePage() {
         <EvaluationStatCard avgScore={latestAvg} trend={trend} href="/evaluations" />
       </div>
 
-      <div>
-        <h2 className="mb-3 text-base font-semibold text-app-text">メニュー</h2>
-        <QuickLinks />
+      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+        <RecentReports reports={latestReports ?? []} />
+        <ScoreTrend items={trendItems} />
       </div>
     </div>
   );

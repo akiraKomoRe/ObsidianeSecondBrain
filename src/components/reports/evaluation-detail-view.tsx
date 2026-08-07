@@ -69,7 +69,7 @@ export function EvaluationDetailView({
         ))}
       </div>
 
-      <p className="flex items-start gap-1.5 rounded-xl bg-app-surface px-3.5 py-3 text-xs text-app-text-muted">
+      <p className="flex items-start gap-1.5 rounded-lg bg-app-surface px-3.5 py-3 text-xs text-app-text-muted">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         これはAIによる週次評価のドラフトです。最終的な評価は上長が確認のうえ確定します。
       </p>

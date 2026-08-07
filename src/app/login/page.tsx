@@ -15,7 +15,7 @@ export default async function LoginPage({
         <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-slate-500/20 blur-3xl" />
 
         <div className="relative flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-sm font-bold text-slate-900">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-sm font-bold text-slate-900">
             昭
           </div>
           <p className="text-sm font-semibold">昭和建設工業</p>
@@ -38,7 +38,7 @@ export default async function LoginPage({
       <div className="flex w-full flex-col items-center justify-start px-6 pb-12 pt-20 lg:w-1/2 lg:justify-center lg:py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-app-text text-sm font-bold text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-text text-sm font-bold text-white">
               昭
             </div>
             <p className="text-sm font-semibold text-app-text">昭和建設工業</p>

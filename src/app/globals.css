@@ -32,7 +32,11 @@
      shadcn's *neutral hover surface* semantic, not our brand accent color --
      mapping it to --app-accent-soft would incorrectly tint every
      ghost/outline hover state blue. */
-  --radius: 0.5rem;
+  /* One radius for the whole app (6px), matching SmartHR. The previous mix of
+     5 values read as unresolved, and the larger 12-16px radii gave a consumer
+     -app feel rather than a business tool. rounded-full is still used, but
+     only where it carries meaning: badges, avatars, icon buttons. */
+  --radius: 0.375rem;
   --card: var(--app-card);
   --card-foreground: var(--app-text);
   --popover: var(--app-card);
@@ -55,7 +59,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto-sans-jp), var(--font-geist-sans), sans-serif;
+  /* Latin face first so numerals/dates render in Geist -- Noto Sans JP is a CJK
+     face whose Latin is secondary, and this app's screens are numbers-first
+     (scores, hours, counts). Japanese then falls through to the OS face, which
+     is what SmartHR/MoneyForward/freee all do; Noto Sans JP stays as the last
+     resort so Linux/Android still match. */
+  --font-sans: var(--font-geist-sans), "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic Medium", "Yu Gothic", var(--font-noto-sans-jp), sans-serif;
   --font-mono: var(--font-geist-mono);
 
   --color-app-bg: var(--app-bg);
@@ -75,10 +85,35 @@
   --color-app-danger: var(--app-danger);
   --color-app-danger-soft: var(--app-danger-soft);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  /* Deliberately compressed into 4-8px. Any stray rounded-xl/2xl left in the
+     tree lands near the base instead of Tailwind's 16px default. */
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 2px);
+
+  /* Type scale. text-sm stays 14px so existing copy doesn't shrink; the gap
+     this fixes is the missing middle tier (text-md, 17px) between body and
+     the 22px heading -- without it every screen read as one flat weight.
+     Line-heights are set for Japanese, which needs more leading than the
+     Tailwind defaults (1.43 at this size) to avoid looking cramped. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.6;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.7;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.8;
+  --text-md: 1.0625rem;
+  --text-md--line-height: 1.6;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.5;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.3;
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 1.25;
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -101,4 +136,12 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Scores, hours, counts and dates sit in columns and change between renders,
+   so they get fixed-width figures to stop them shifting around. */
+.tabular,
+table,
+time {
+  font-variant-numeric: tabular-nums;
 }
