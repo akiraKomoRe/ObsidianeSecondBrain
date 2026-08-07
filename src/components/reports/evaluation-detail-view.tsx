@@ -3,11 +3,13 @@ import { ArrowLeft, Info, Sparkles } from "lucide-react";
 
 import { formatWeekLabel } from "@/lib/date/week";
 import { ScoreBar } from "@/app/(app)/evaluations/score-bar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import type { WeeklyAiEvaluation } from "@/types/database";
 
 function scoreBorderClass(score: number): string {
   if (score >= 4) return "border-l-app-success";
-  if (score >= 3) return "border-l-app-accent";
+  if (score >= 3) return "border-l-primary";
   return "border-l-app-danger";
 }
 
@@ -33,10 +35,10 @@ export function EvaluationDetailView({
           <h1 className="text-xl font-bold text-app-text">
             {formatWeekLabel(evaluation.week_start, evaluation.week_end)}
           </h1>
-          <span className="flex items-center gap-1 rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-semibold text-app-accent">
+          <Badge variant="accent">
             <Sparkles className="h-3 w-3" />
             AIによるドラフト評価
-          </span>
+          </Badge>
         </div>
         <p className="mt-1 text-xs text-app-text-faint">
           生成日時: {new Date(evaluation.generated_at).toLocaleString("ja-JP")}
@@ -44,19 +46,16 @@ export function EvaluationDetailView({
         </p>
       </div>
 
-      <div className="rounded-2xl border border-app-border bg-app-card p-5">
+      <Card className="p-5">
         <h2 className="text-sm font-semibold text-app-text">総評</h2>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-app-text-muted">
           {evaluation.overall_summary}
         </p>
-      </div>
+      </Card>
 
       <div className="space-y-3">
         {evaluation.criteria_scores.map((score) => (
-          <div
-            key={score.key}
-            className={`rounded-2xl border border-app-border border-l-4 bg-app-card p-5 ${scoreBorderClass(score.score)}`}
-          >
+          <Card key={score.key} className={`gap-2 border-l-4 p-5 ${scoreBorderClass(score.score)}`}>
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-medium text-app-text">{score.label}</p>
               <p className="text-sm font-semibold text-app-text">
@@ -64,11 +63,9 @@ export function EvaluationDetailView({
                 <span className="font-normal text-app-text-faint"> / 5</span>
               </p>
             </div>
-            <div className="mt-2.5">
-              <ScoreBar score={score.score} />
-            </div>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-app-text-muted">{score.comment}</p>
-          </div>
+            <ScoreBar score={score.score} />
+            <p className="whitespace-pre-wrap text-sm text-app-text-muted">{score.comment}</p>
+          </Card>
         ))}
       </div>
 
