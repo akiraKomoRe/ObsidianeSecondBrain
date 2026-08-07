@@ -111,10 +111,13 @@ supabase/
 
 ### 運用前に必要な準備
 
-1. `evaluation_periods` に対象の期を登録する
-2. `behavior_guidelines` に5つの行動指針と、役職別の期待行動を登録する
-3. 各ユーザーの `profiles.job_grade` を設定する（既定値は `ippan`）。
+1. **`supabase/seed_term_evaluation.sql` を流す。**
+   行動指針30件（5指針 × 6役職）と、2026年の上期・下期が入る。
+   何度流しても重複しない（`on conflict do update`）。
+   **これを流さないと行動指針項目が0件の評価シートができる**（一般職なら配点の8割が欠落する）
+2. 各ユーザーの `profiles.job_grade` を設定する（既定値は `ippan`）。
    権限用の `role` とは別物で、こちらが配点を決める
+3. 翌年以降は `evaluation_periods` に期を追加する
 
 ### 上長評価が本人に見えるタイミング
 

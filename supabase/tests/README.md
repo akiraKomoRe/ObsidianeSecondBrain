@@ -36,6 +36,11 @@ su postgres -c "psql -h $PGDIR -p 55432 -d postgres -q -c '
   grant select, insert, update, delete on all tables in schema public to authenticated;'"
 
 P supabase/tests/01_term_evaluation_rls.sql
+
+# シードと、行動指針が実際に生成されるかの確認
+P supabase/seed_term_evaluation.sql
+P supabase/seed_term_evaluation.sql   # 2回流して冪等性を確認
+P supabase/tests/02_term_evaluation_seed.sql
 ```
 
 ## 期待される結果
@@ -51,6 +56,8 @@ P supabase/tests/01_term_evaluation_rls.sql
 | 公開後・本人 | 上長評価が見える |
 | 本人が上長評価をUPDATE | 0行（書き換え不可） |
 | 承認依頼後に本人が自分の目標をUPDATE | 0行（凍結される） |
+| シードを2回流す | `behavior_guidelines` は30件のまま |
+| 一般職でシート作成 | 行動指針項目が**5件**生成される（0件なら未シード） |
 
 ## 注意
 
