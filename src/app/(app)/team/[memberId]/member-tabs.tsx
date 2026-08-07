@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+
 const TABS = [
   { suffix: "", label: "概要" },
   { suffix: "/daily", label: "日報" },
@@ -15,7 +17,7 @@ export function MemberTabs({ memberId }: { memberId: string }) {
   const base = `/team/${memberId}`;
 
   return (
-    <nav className="flex gap-1 overflow-x-auto border-b border-app-border">
+    <nav className="flex w-full gap-1 overflow-x-auto rounded-full border border-app-border bg-app-card p-1.5">
       {TABS.map((tab) => {
         const href = `${base}${tab.suffix}`;
         const active = tab.suffix === "" ? pathname === base : pathname.startsWith(href);
@@ -23,11 +25,10 @@ export function MemberTabs({ memberId }: { memberId: string }) {
           <Link
             key={tab.suffix}
             href={href}
-            className={`shrink-0 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
-              active
-                ? "border-app-accent text-app-accent"
-                : "border-transparent text-app-text-muted hover:text-app-text"
-            }`}
+            className={cn(
+              "shrink-0 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
+              active ? "bg-primary text-primary-foreground" : "text-app-text-muted hover:bg-app-card-hover hover:text-app-text"
+            )}
           >
             {tab.label}
           </Link>

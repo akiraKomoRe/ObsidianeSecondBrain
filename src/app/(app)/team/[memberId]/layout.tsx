@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { getTeamMember } from "@/lib/team/get-team-member";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MemberTabs } from "./member-tabs";
 
 export default async function TeamMemberLayout({
@@ -26,9 +27,9 @@ export default async function TeamMemberLayout({
       </Link>
 
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-base font-semibold text-app-accent">
-          {initial}
-        </div>
+        <Avatar className="h-11 w-11 shrink-0">
+          <AvatarFallback className="text-base">{initial}</AvatarFallback>
+        </Avatar>
         <div className="min-w-0">
           <h1 className="truncate text-xl font-bold text-app-text">{member.name}</h1>
           <p className="truncate text-sm text-app-text-muted">{member.department ?? member.email}</p>

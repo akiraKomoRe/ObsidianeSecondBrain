@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireManagerOrAdmin } from "@/lib/team/get-team-member";
 import { formatDate, getWeekRange } from "@/lib/date/week";
 import { Card, CardHeader } from "@/components/ui/section-card";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TeamMemberRow } from "./team-member-row";
 import type { TeamMemberSummary } from "@/lib/team/types";
 import type { Profile } from "@/types/database";
@@ -78,11 +79,22 @@ export default async function TeamPage() {
       ) : (
         <Card>
           <CardHeader title="チームメンバー" count={summaries.length} />
-          <ul className="divide-y divide-app-border">
-            {summaries.map((summary) => (
-              <TeamMemberRow key={summary.profile.id} summary={summary} />
-            ))}
-          </ul>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>メンバー</TableHead>
+                <TableHead className="hidden sm:table-cell">本日</TableHead>
+                <TableHead className="hidden sm:table-cell">今週</TableHead>
+                <TableHead className="text-right">直近評価</TableHead>
+                <TableHead className="w-8 px-2" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summaries.map((summary) => (
+                <TeamMemberRow key={summary.profile.id} summary={summary} />
+              ))}
+            </TableBody>
+          </Table>
         </Card>
       )}
     </div>
