@@ -102,3 +102,34 @@ test("採点列を切り替えても独立して集計される", () => {
   assert.equal(calculateTermScore(items, weights, "manager").total, 60);
   assert.equal(calculateTermScore(items, weights, "final").total, 0);
 });
+
+test("未採点の目標がundefinedでも合計がNaNにならない", () => {
+  // 期首設定の直後は self_score が一度も書かれていない。Postgres なら null が
+  // 返るが、経路によっては undefined で届く。`!== null` で弾いていた時期に
+  // 画面が「NaN / 100」になった実際の不具合の回帰テスト。
+  const items = [
+    { category: "quantitative", selfScore: undefined, managerScore: null, finalScore: null },
+    { category: "behavioral", selfScore: undefined, managerScore: null, finalScore: null },
+  ] as unknown as EvaluationItem[];
+
+  const score = calculateTermScore(items, JOB_GRADE_WEIGHTS.ippan, "self");
+
+  assert.equal(score.total, 0);
+  assert.ok(score.categories.every((c) => Number.isFinite(c.points)));
+  assert.equal(score.categories[0].scoredCount, 0, "未採点なのに採点済みと数えている");
+  assert.equal(score.complete, false);
+});
+
+test("採点済みと未採点が混在しても採点済みだけで按分される", () => {
+  const items = [
+    { category: "behavioral", selfScore: 5, managerScore: null, finalScore: null },
+    { category: "behavioral", selfScore: undefined, managerScore: null, finalScore: null },
+  ] as unknown as EvaluationItem[];
+
+  const score = calculateTermScore(items, { quantitative: 0, behavioral: 1, development: 0 }, "self");
+
+  // 採点済み1件が満点なので満点。未採点は分母から外れる（ExcelのCOUNTA挙動）。
+  assert.equal(score.total, 100);
+  assert.equal(score.categories[1].scoredCount, 1);
+  assert.equal(score.categories[1].itemCount, 2);
+});

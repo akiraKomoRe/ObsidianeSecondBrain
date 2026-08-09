@@ -73,11 +73,18 @@ describe("上長評価の公開前ブラックアウト", () => {
     }
   });
 
-  test("無関係な社員: 目標も上長評価も0件", async () => {
-    const { data: items } = await as(SUZUKI).from("term_evaluation_items").select("*");
-    const { data: marks } = await as(SUZUKI).from("term_evaluation_marks").select("*");
-    assert.equal(items!.length, 0);
-    assert.equal(marks!.length, 0);
+  test("同僚どうしは互いの目標も上長評価も見えない", async () => {
+    // 山田と鈴木は同じ佐藤の部下だが、横並びの関係。互いの評価は見えない。
+    const { data: items } = await as(SUZUKI)
+      .from("term_evaluation_items")
+      .select("*")
+      .eq("term_evaluation_id", TERM);
+    const { data: marks } = await as(SUZUKI)
+      .from("term_evaluation_marks")
+      .select("*")
+      .eq("term_evaluation_id", TERM);
+    assert.equal(rows({ data: items }).length, 0, "同僚の目標が見えている");
+    assert.equal(rows({ data: marks }).length, 0, "同僚の上長評価が見えている");
   });
 
   test("公開後・本人: 上長評価が見える", async () => {
@@ -98,8 +105,10 @@ describe("上長評価の公開前ブラックアウト", () => {
       .select("item_id");
 
     assert.equal(data!.length, 0, "本人が自分の評点を書き換えられている");
-    const stored = loadTables().term_evaluation_marks.map((m) => m.manager_score);
-    assert.ok(!stored.includes(5) || stored.filter((s) => s === 5).length === 0);
+    const stored = loadTables()
+      .term_evaluation_marks.filter((m) => m.term_evaluation_id === TERM)
+      .map((m) => m.manager_score);
+    assert.ok(!stored.includes(5), "書き換えが通ってしまっている");
   });
 });
 
@@ -137,8 +146,11 @@ describe("承認依頼後の凍結", () => {
 
 describe("サービスロール", () => {
   test("viewer=null はポリシーを迂回する（週次AI評価の書き込み用）", async () => {
-    const { data } = await as(null).from("term_evaluation_marks").select("*");
-    assert.equal(data!.length, 10);
+    const { data } = await as(null)
+      .from("term_evaluation_marks")
+      .select("*")
+      .eq("term_evaluation_id", TERM);
+    assert.equal(rows({ data }).length, 10);
   });
 });
 
@@ -198,6 +210,24 @@ describe("クエリビルダの互換性", () => {
     assert.equal(error, null);
     assert.ok((data as { id: string }).id);
     assert.ok((data as { created_at: string }).created_at);
+  });
+
+  test("省略した列は undefined ではなく null で入る（Postgresと同じ）", async () => {
+    // undefined と null は交換可能ではない。`!== null` を通り抜けた undefined が
+    // 期末評価の合計を NaN にした実際の不具合があるため、ここで揃えている。
+    loadTables().term_evaluations.find((e) => e.id === TERM)!.status = "draft";
+    const { data, error } = await as(YAMADA)
+      .from("term_evaluation_items")
+      .insert({ term_evaluation_id: TERM, category: "quantitative", sort_order: 9, title: "新目標" })
+      .select("*")
+      .single();
+
+    assert.equal(error, null);
+    const row = data as Cell;
+    for (const column of ["self_score", "self_comment", "midterm_progress", "midterm_self_score"]) {
+      assert.equal(row[column], null, `${column} が null になっていない`);
+      assert.ok(column in row, `${column} が行に存在しない`);
+    }
   });
 
   test("一意制約の違反は 23505 で返る", async () => {

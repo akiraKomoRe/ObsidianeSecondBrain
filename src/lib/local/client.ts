@@ -2,7 +2,14 @@ import { randomUUID } from "node:crypto";
 
 import { commit, loadTables } from "./store.ts";
 import { blockedColumn, canSelect, canWrite, type Viewer } from "./policy.ts";
-import { PRIMARY_KEY, UNIQUE_KEYS, type LocalTables, type Row, type TableName } from "./tables.ts";
+import {
+  COLUMN_DEFAULTS,
+  PRIMARY_KEY,
+  UNIQUE_KEYS,
+  type LocalTables,
+  type Row,
+  type TableName,
+} from "./tables.ts";
 
 /**
  * A stand-in for the Supabase client, implementing exactly the surface this
@@ -70,7 +77,8 @@ const TIMESTAMPED = new Set<TableName>([
 
 function applyInsertDefaults(table: TableName, row: Row): Row {
   const now = new Date().toISOString();
-  const withDefaults: Row = { ...row };
+  // Column defaults first, so an explicitly-passed value always wins.
+  const withDefaults: Row = { ...COLUMN_DEFAULTS[table], ...row };
   if (PRIMARY_KEY[table] === "id" && withDefaults.id === undefined) {
     withDefaults.id = randomUUID();
   }

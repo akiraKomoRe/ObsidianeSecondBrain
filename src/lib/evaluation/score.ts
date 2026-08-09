@@ -101,9 +101,14 @@ export function calculateTermScore(
 ): TermScore {
   const categories = EVALUATION_CATEGORIES.map<CategoryScore>((category) => {
     const inCategory = items.filter((item) => item.category === category);
+    // `typeof === "number"`, not `!== null`: a goal that has never been graded
+    // can arrive as undefined rather than null, and `undefined !== null` is
+    // true -- which counted it as scored and made the whole total NaN.
+    // These figures feed bonuses, so anything that is not a number is not a
+    // score.
     const scores = inCategory
       .map((item) => pickScore(item, column))
-      .filter((score): score is number => score !== null);
+      .filter((score): score is number => typeof score === "number" && Number.isFinite(score));
 
     const weight = weights[category];
     const points =
@@ -125,7 +130,7 @@ export function calculateTermScore(
   return {
     categories,
     total: categories.reduce((sum, category) => sum + category.points, 0),
-    complete: items.every((item) => pickScore(item, column) !== null),
+    complete: items.every((item) => typeof pickScore(item, column) === "number"),
   };
 }
 

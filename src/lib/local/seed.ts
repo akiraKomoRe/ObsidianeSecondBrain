@@ -27,6 +27,7 @@ const ID = {
   periodH1: "aaaaaaaa-0000-4000-8000-000000000001",
   periodH2: "aaaaaaaa-0000-4000-8000-000000000002",
   termYamadaH1: "bbbbbbbb-0000-4000-8000-000000000001",
+  termSuzukiH1: "bbbbbbbb-0000-4000-8000-000000000002",
 };
 
 const NOW = "2026-08-09T09:00:00.000Z";
@@ -207,6 +208,85 @@ const H1_GOALS: {
   },
 ];
 
+/**
+ * 鈴木's 上期 sheet, submitted by 佐藤 and waiting on 田中.
+ *
+ * Without a sheet in this state the 承認待ち screen is permanently empty, and
+ * the two-step approval — the part of the scheme that most needs explaining —
+ * cannot be seen at all.
+ */
+const SUZUKI_H1_GOALS: typeof H1_GOALS = [
+  {
+    category: "quantitative",
+    title: "若手2名の施工図作成を指導し、独力で仕上げられる状態にする",
+    selfComment: "週1回のレビューを継続し、2名とも簡易な図面は独力で作成できるようになりました。",
+    selfScore: 4,
+    managerComment: "指導の仕組み化まで進めてくれました。次は難易度の高い図面へ。",
+    managerScore: 4,
+  },
+  {
+    category: "quantitative",
+    title: "現場Bの安全パトロール指摘件数を前期比で半減させる",
+    selfComment: "指摘は前期24件から15件に減少。半減には届きませんでした。",
+    selfScore: 3,
+    managerComment: "改善傾向は明確です。残る指摘の傾向分析を次期の目標に。",
+    managerScore: 3,
+  },
+];
+
+const SUZUKI_DEV_GOALS: typeof H1_GOALS = [
+  {
+    category: "development",
+    title: "1級土木施工管理技士の一次検定に合格する",
+    selfComment: "6月の一次検定に合格しました。二次は下期に受験します。",
+    selfScore: 5,
+    managerComment: "計画的に学習を進め、一発合格しました。",
+    managerScore: 5,
+  },
+];
+
+/**
+ * The five company-wide guidelines as graded goals.
+ *
+ * Only the self/manager comments live here -- the grade-specific 期待行動 text
+ * is looked up from EXPECTED_BEHAVIOR when the sheet is laid down, the same way
+ * the app copies it out of behavior_guidelines at 期首.
+ */
+function behavioralGoalsFor(): typeof H1_GOALS {
+  const selfComments = [
+    "協力業者との定例を設け、認識のずれを早めに潰すようにしました。",
+    "現場から出た改善案を月次でまとめ、課内に共有しています。",
+    "1級の学科に合格し、後輩への説明にも使えるようになりました。",
+    "指示待ちにならないよう、着工前に課題を洗い出して提案しています。",
+    "できない約束はせず、遅れそうな時は早めに相談するようにしています。",
+  ];
+  const managerComments = [
+    "現場の空気が良くなりました。",
+    "提案が具体的で助かっています。",
+    "学んだことを周りに還元できています。",
+    "先回りの動きが増えました。",
+    "報告が早く、安心して任せられます。",
+  ];
+  const selfScores = [4, 4, 5, 4, 4];
+  const managerScores = [4, 3, 5, 4, 4];
+
+  return selfComments.map((selfComment, i) => ({
+    category: "behavioral" as const,
+    title: GUIDELINE_TITLES[i],
+    selfComment,
+    selfScore: selfScores[i],
+    managerComment: managerComments[i],
+    managerScore: managerScores[i],
+  }));
+}
+
+/** Category order on the sheet, matching 人事評価規程 第5条. */
+const CATEGORY_ORDER: Record<string, number> = {
+  quantitative: 0,
+  behavioral: 1,
+  development: 2,
+};
+
 /** Two weeks of 山田's reports, so the dashboard and AI screens have content. */
 const DAILY: { date: string; content: string; hours: number; issues: string; plan: string }[] = [
   {
@@ -375,40 +455,86 @@ export function buildSeed(): LocalTables {
       created_at: "2026-01-05T00:00:00.000Z",
       updated_at: "2026-07-04T01:00:00.000Z",
     },
+    {
+      id: ID.termSuzukiH1,
+      user_id: ID.suzuki,
+      period_id: ID.periodH1,
+      stage: "final",
+      // 佐藤 has graded and submitted; 田中 has not signed off yet. This is what
+      // populates the 承認待ち screen.
+      status: "pending_approval",
+      job_grade: "shunin",
+      overall_self_comment:
+        "若手指導は形になってきました。安全指摘の半減は未達で、原因の切り分けが次期の課題です。",
+      overall_manager_comment:
+        "【よかった点】指導を仕組みにまで落とし込めた点。【さらに成長するためのポイント】数値目標は途中経過の共有をもう一段細かく。",
+      submitted_for_approval_at: "2026-07-06T01:30:00.000Z",
+      approver_id: null,
+      approved_at: null,
+      disclosed_at: null,
+      final_snapshot: null,
+      created_at: "2026-01-05T00:00:00.000Z",
+      updated_at: "2026-07-06T01:30:00.000Z",
+    },
   ];
 
   const term_evaluation_items: LocalTables["term_evaluation_items"] = [];
   const term_evaluation_marks: LocalTables["term_evaluation_marks"] = [];
-  const perCategoryOrder: Record<string, number> = {};
 
-  H1_GOALS.forEach((goal, index) => {
-    const sortOrder = (perCategoryOrder[goal.category] = (perCategoryOrder[goal.category] ?? 0) + 1);
-    const itemId = `term-item-${index + 1}`;
-    term_evaluation_items.push({
-      id: itemId,
-      term_evaluation_id: ID.termYamadaH1,
-      category: goal.category,
-      sort_order: sortOrder,
-      title: goal.title,
-      expected_behavior:
-        goal.category === "behavioral" ? EXPECTED_BEHAVIOR.ippan[sortOrder - 1] : null,
-      midterm_progress: null,
-      midterm_self_score: null,
-      self_comment: goal.selfComment,
-      self_score: goal.selfScore,
-      created_at: "2026-01-05T00:00:00.000Z",
-      updated_at: "2026-06-30T00:00:00.000Z",
+  /** Lay one person's sheet down: goals, the five guidelines, and the marks. */
+  function addSheet(
+    evaluationId: string,
+    grade: JobGrade,
+    goals: typeof H1_GOALS,
+    prefix: string
+  ) {
+    const perCategoryOrder: Record<string, number> = {};
+    // The behavioral five are company-wide, so they are appended to whatever
+    // free-text goals the person wrote -- the same thing createTermEvaluation
+    // does at 期首.
+    const all = [
+      ...goals.filter((g) => g.category !== "behavioral"),
+      ...goals.filter((g) => g.category === "behavioral"),
+    ].sort((a, b) => CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category]);
+
+    all.forEach((goal, index) => {
+      const sortOrder = (perCategoryOrder[goal.category] =
+        (perCategoryOrder[goal.category] ?? 0) + 1);
+      const itemId = `${prefix}-${index + 1}`;
+      term_evaluation_items.push({
+        id: itemId,
+        term_evaluation_id: evaluationId,
+        category: goal.category,
+        sort_order: sortOrder,
+        title: goal.title,
+        expected_behavior:
+          goal.category === "behavioral" ? EXPECTED_BEHAVIOR[grade][sortOrder - 1] : null,
+        midterm_progress: null,
+        midterm_self_score: null,
+        self_comment: goal.selfComment,
+        self_score: goal.selfScore,
+        created_at: "2026-01-05T00:00:00.000Z",
+        updated_at: "2026-06-30T00:00:00.000Z",
+      });
+      term_evaluation_marks.push({
+        item_id: itemId,
+        term_evaluation_id: evaluationId,
+        manager_comment: goal.managerComment,
+        manager_score: goal.managerScore,
+        final_score: goal.managerScore,
+        created_at: "2026-07-03T00:00:00.000Z",
+        updated_at: "2026-07-03T00:00:00.000Z",
+      });
     });
-    term_evaluation_marks.push({
-      item_id: itemId,
-      term_evaluation_id: ID.termYamadaH1,
-      manager_comment: goal.managerComment,
-      manager_score: goal.managerScore,
-      final_score: goal.managerScore,
-      created_at: "2026-07-03T00:00:00.000Z",
-      updated_at: "2026-07-03T00:00:00.000Z",
-    });
-  });
+  }
+
+  addSheet(ID.termYamadaH1, "ippan", H1_GOALS, "term-item");
+  addSheet(
+    ID.termSuzukiH1,
+    "shunin",
+    [...SUZUKI_H1_GOALS, ...behavioralGoalsFor(), ...SUZUKI_DEV_GOALS],
+    "term-suzuki"
+  );
 
   return {
     profiles,
