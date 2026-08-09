@@ -1,0 +1,152 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/current-user";
+import type { JobGrade, Profile, UserRole } from "@/types/database";
+
+export type AdminState = { error: string | null; success: boolean };
+
+const JOB_GRADES: JobGrade[] = ["director", "bucho", "kacho", "kakaricho", "shunin", "ippan"];
+const ROLES: UserRole[] = ["employee", "manager", "admin"];
+
+async function requireAdmin(): Promise<Profile | null> {
+  const profile = await getCurrentProfile();
+  return profile.role === "admin" ? profile : null;
+}
+
+/**
+ * Set a person's role, job grade and manager.
+ *
+ * Together these three decide what someone can see, how their term score is
+ * weighted, and who evaluates them -- so this is admin-only both here and at
+ * the storage layer (migration 0004's trigger / the local policy's
+ * privileged-column guard).
+ */
+export async function updateMember(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const department = String(formData.get("department") ?? "").trim();
+  const role = String(formData.get("role") ?? "") as UserRole;
+  const jobGrade = String(formData.get("job_grade") ?? "") as JobGrade;
+  const rawManager = String(formData.get("manager_id") ?? "");
+  const managerId = rawManager === "" ? null : rawManager;
+
+  if (!name) return { error: "氏名を入力してください。", success: false };
+  if (!ROLES.includes(role)) return { error: "権限の値が不正です。", success: false };
+  if (!JOB_GRADES.includes(jobGrade)) return { error: "役職の値が不正です。", success: false };
+
+  const supabase = await createClient();
+  const { data: everyone } = await supabase.from("profiles").select("*");
+  const profiles = everyone ?? [];
+  if (!profiles.some((p) => p.id === id)) {
+    return { error: "対象の社員が見つかりません。", success: false };
+  }
+
+  const loop = managerId ? findLoop(profiles, id, managerId) : null;
+  if (loop) return { error: loop, success: false };
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ name, department: department || null, role, job_grade: jobGrade, manager_id: managerId })
+    .eq("id", id)
+    .select("id");
+
+  if (error || !data?.length) {
+    return { error: error?.message ?? "更新に失敗しました。", success: false };
+  }
+
+  revalidatePath("/admin/members");
+  revalidatePath("/team");
+  return { error: null, success: true };
+}
+
+/**
+ * A cycle in the reporting line would make `is_second_approver_of` resolve to
+ * the person themselves, so someone could approve their own evaluation. Walk
+ * the proposed chain upwards before saving.
+ */
+function findLoop(profiles: Profile[], subjectId: string, managerId: string): string | null {
+  if (managerId === subjectId) return "自分自身を上長に設定することはできません。";
+
+  const byId = new Map(profiles.map((p) => [p.id, p]));
+  const seen = new Set<string>([subjectId]);
+  let current: string | null = managerId;
+
+  while (current) {
+    if (seen.has(current)) {
+      return "上長の設定が循環しています。組織図をたどれる形にしてください。";
+    }
+    seen.add(current);
+    current = byId.get(current)?.manager_id ?? null;
+  }
+  return null;
+}
+
+/**
+ * Open a new evaluation period. The dates are derived rather than typed in:
+ * halves run Jan-Jun and Jul-Dec to line up with the July and December bonus
+ * months of 賃金規定 第29条, and a hand-typed range could silently break that.
+ */
+export async function createPeriod(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const year = Number(formData.get("year"));
+  const half = String(formData.get("half") ?? "");
+
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    return { error: "年度の値が不正です。", success: false };
+  }
+  if (half !== "H1" && half !== "H2") {
+    return { error: "上期・下期を選択してください。", success: false };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("evaluation_periods").insert({
+    year,
+    half,
+    starts_on: half === "H1" ? `${year}-01-01` : `${year}-07-01`,
+    ends_on: half === "H1" ? `${year}-06-30` : `${year}-12-31`,
+    status: "open",
+  });
+
+  if (error) {
+    return {
+      error:
+        error.code === "23505"
+          ? "その期は既に登録されています。"
+          : "評価期間の登録に失敗しました。",
+      success: false,
+    };
+  }
+
+  revalidatePath("/admin/periods");
+  revalidatePath("/evaluations/term");
+  return { error: null, success: true };
+}
+
+/** Close a period so no new sheets are started against it, or reopen it. */
+export async function setPeriodStatus(_prev: AdminState, formData: FormData): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "");
+  if (status !== "open" && status !== "closed") {
+    return { error: "不正な操作です。", success: false };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("evaluation_periods")
+    .update({ status })
+    .eq("id", id)
+    .select("id");
+
+  if (error || !data?.length) return { error: "更新に失敗しました。", success: false };
+
+  revalidatePath("/admin/periods");
+  return { error: null, success: true };
+}

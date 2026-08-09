@@ -1,3 +1,5 @@
+import { isLocalMode } from "@/lib/local/mode";
+import { DemoAccounts } from "./demo-accounts";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({
@@ -47,6 +49,7 @@ export default async function LoginPage({
           <h1 className="text-xl font-bold text-app-text">ログイン</h1>
           <p className="mt-1 text-sm text-app-text-muted">アカウントの情報を入力してください。</p>
           <LoginForm redirectTo={redirectTo ?? "/"} />
+          {isLocalMode() ? <DemoAccounts /> : null}
         </div>
       </div>
     </div>

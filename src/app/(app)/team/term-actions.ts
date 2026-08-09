@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-user";
 import { getTermEvaluation, scoreView } from "@/lib/evaluation/get-term";
+import {
+  isDenied,
+  relationTo,
+  requireManagerDraft,
+  requireSecondApprover,
+} from "@/lib/evaluation/authz";
 
 export type TermManagerState = { error: string | null; success: boolean };
 
@@ -26,33 +32,44 @@ export async function saveManagerMarks(
 ): Promise<TermManagerState> {
   const evaluationId = String(formData.get("evaluation_id") ?? "");
   const itemIds = formData.getAll("item_id").map(String);
+
+  // requireManagerDraft also refuses once the evaluation is approved: those
+  // figures feed the bonus (人事評価規程 第10条) and the employee may dispute
+  // them (第12条), so they must not move after sign-off.
+  const allowed = await requireManagerDraft(evaluationId);
+  if (isDenied(allowed)) return { error: allowed.error, success: false };
+
   const supabase = await createClient();
 
   for (const itemId of itemIds) {
     const managerScore = parseScore(formData.get(`manager_score_${itemId}`));
-    const { error } = await supabase.from("term_evaluation_marks").upsert(
-      {
-        item_id: itemId,
-        term_evaluation_id: evaluationId,
-        manager_score: managerScore,
-        manager_comment: String(formData.get(`manager_comment_${itemId}`) ?? "").trim(),
-        // The final score defaults to the manager's, and is only overridden if
-        // the second approver adjusts it.
-        final_score: managerScore,
-      },
-      { onConflict: "item_id" }
-    );
-    if (error) return { error: "保存に失敗しました。", success: false };
+    const { data, error } = await supabase
+      .from("term_evaluation_marks")
+      .upsert(
+        {
+          item_id: itemId,
+          term_evaluation_id: evaluationId,
+          manager_score: managerScore,
+          manager_comment: String(formData.get(`manager_comment_${itemId}`) ?? "").trim(),
+          // The final score defaults to the manager's, and is only overridden if
+          // the second approver adjusts it.
+          final_score: managerScore,
+        },
+        { onConflict: "item_id" }
+      )
+      .select("item_id");
+    if (error || !data?.length) return { error: "保存に失敗しました。", success: false };
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("term_evaluations")
     .update({
       overall_manager_comment: String(formData.get("overall_manager_comment") ?? "").trim(),
     })
-    .eq("id", evaluationId);
+    .eq("id", evaluationId)
+    .select("id");
 
-  if (error) return { error: "保存に失敗しました。", success: false };
+  if (error || !data?.length) return { error: "保存に失敗しました。", success: false };
 
   revalidatePath("/team");
   return { error: null, success: true };
@@ -64,8 +81,14 @@ export async function submitForApproval(
   formData: FormData
 ): Promise<TermManagerState> {
   const evaluationId = String(formData.get("evaluation_id") ?? "");
-  const view = await getTermEvaluation(evaluationId);
 
+  const allowed = await requireManagerDraft(evaluationId);
+  if (isDenied(allowed)) return { error: allowed.error, success: false };
+  if (allowed.evaluation.status === "pending_approval") {
+    return { error: "既に承認依頼済みです。", success: false };
+  }
+
+  const view = await getTermEvaluation(evaluationId);
   const ungraded = view.items.filter((item) => item.mark?.manager_score == null);
   if (ungraded.length > 0) {
     return {
@@ -75,12 +98,13 @@ export async function submitForApproval(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("term_evaluations")
     .update({ status: "pending_approval", submitted_for_approval_at: new Date().toISOString() })
-    .eq("id", evaluationId);
+    .eq("id", evaluationId)
+    .select("id");
 
-  if (error) return { error: "承認依頼に失敗しました。", success: false };
+  if (error || !data?.length) return { error: "承認依頼に失敗しました。", success: false };
 
   revalidatePath("/team");
   revalidatePath("/approvals");
@@ -98,23 +122,26 @@ export async function approveTermEvaluation(
   formData: FormData
 ): Promise<TermManagerState> {
   const evaluationId = String(formData.get("evaluation_id") ?? "");
-  const approver = await getCurrentProfile();
-  const view = await getTermEvaluation(evaluationId);
 
-  if (view.evaluation.status !== "pending_approval") {
+  const allowed = await requireSecondApprover(evaluationId);
+  if (isDenied(allowed)) return { error: allowed.error, success: false };
+  if (allowed.evaluation.status !== "pending_approval") {
     return { error: "承認待ちの評価ではありません。", success: false };
   }
 
+  const approver = await getCurrentProfile();
+  const view = await getTermEvaluation(evaluationId);
   const finalScore = scoreView(view, "final");
   const selfScore = scoreView(view, "self");
+  const approvedAt = new Date().toISOString();
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("term_evaluations")
     .update({
       status: "approved",
       approver_id: approver.id,
-      approved_at: new Date().toISOString(),
+      approved_at: approvedAt,
       final_snapshot: {
         job_grade: view.evaluation.job_grade,
         final_total: finalScore.total,
@@ -129,12 +156,13 @@ export async function approveTermEvaluation(
           final_score: item.mark?.final_score ?? null,
         })),
         approved_by: approver.id,
-        approved_at: new Date().toISOString(),
+        approved_at: approvedAt,
       },
     })
-    .eq("id", evaluationId);
+    .eq("id", evaluationId)
+    .select("id");
 
-  if (error) return { error: "承認に失敗しました。", success: false };
+  if (error || !data?.length) return { error: "承認に失敗しました。", success: false };
 
   revalidatePath("/team");
   revalidatePath("/approvals");
@@ -147,13 +175,21 @@ export async function rejectTermEvaluation(
   formData: FormData
 ): Promise<TermManagerState> {
   const evaluationId = String(formData.get("evaluation_id") ?? "");
+
+  const allowed = await requireSecondApprover(evaluationId);
+  if (isDenied(allowed)) return { error: allowed.error, success: false };
+  if (allowed.evaluation.status !== "pending_approval") {
+    return { error: "承認待ちの評価ではありません。", success: false };
+  }
+
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("term_evaluations")
     .update({ status: "draft", submitted_for_approval_at: null })
-    .eq("id", evaluationId);
+    .eq("id", evaluationId)
+    .select("id");
 
-  if (error) return { error: "差し戻しに失敗しました。", success: false };
+  if (error || !data?.length) return { error: "差し戻しに失敗しました。", success: false };
 
   revalidatePath("/team");
   revalidatePath("/approvals");
@@ -173,19 +209,28 @@ export async function discloseTermEvaluation(
   formData: FormData
 ): Promise<TermManagerState> {
   const evaluationId = String(formData.get("evaluation_id") ?? "");
-  const view = await getTermEvaluation(evaluationId);
 
+  // Not requireManagerDraft: by definition this runs on an approved sheet.
+  const view = await getTermEvaluation(evaluationId);
+  const relation = await relationTo(view.evaluation.user_id);
+  if (relation !== "manager" && relation !== "admin") {
+    return { error: "この評価を公開する権限がありません。", success: false };
+  }
   if (view.evaluation.status !== "approved") {
     return { error: "承認が完了してから公開してください。", success: false };
   }
+  if (view.evaluation.disclosed_at) {
+    return { error: "既に公開済みです。", success: false };
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("term_evaluations")
     .update({ disclosed_at: new Date().toISOString() })
-    .eq("id", evaluationId);
+    .eq("id", evaluationId)
+    .select("id");
 
-  if (error) return { error: "公開に失敗しました。", success: false };
+  if (error || !data?.length) return { error: "公開に失敗しました。", success: false };
 
   revalidatePath("/team");
   revalidatePath("/evaluations/term");

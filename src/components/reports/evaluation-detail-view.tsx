@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, Info, Sparkles } from "lucide-react";
+import { ArrowLeft, FlaskConical, Info, Sparkles } from "lucide-react";
 
 import { formatWeekLabel } from "@/lib/date/week";
+import { LOCAL_MODEL_VERSION } from "@/lib/evaluation/local-generate";
 import { ScoreBar } from "@/app/(app)/evaluations/score-bar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -20,6 +21,10 @@ export function EvaluationDetailView({
   evaluation: WeeklyAiEvaluation;
   backHref: string;
 }) {
+  // Read off the stored row rather than the current env: a row generated
+  // locally stays labelled as such even after the API key is added.
+  const isLocal = evaluation.model_version === LOCAL_MODEL_VERSION;
+
   return (
     <div className="space-y-5">
       <Link
@@ -35,15 +40,29 @@ export function EvaluationDetailView({
           <h1 className="text-xl font-bold text-app-text">
             {formatWeekLabel(evaluation.week_start, evaluation.week_end)}
           </h1>
-          <Badge variant="accent">
-            <Sparkles className="h-3 w-3" />
-            AIによるドラフト評価
-          </Badge>
+          {isLocal ? (
+            <Badge variant="outline">
+              <FlaskConical className="h-3 w-3" />
+              ローカル生成（AI未接続）
+            </Badge>
+          ) : (
+            <Badge variant="accent">
+              <Sparkles className="h-3 w-3" />
+              AIによるドラフト評価
+            </Badge>
+          )}
         </div>
         <p className="mt-1 text-xs text-app-text-faint">
           生成日時: {new Date(evaluation.generated_at).toLocaleString("ja-JP")}
           {evaluation.model_version ? `（モデル: ${evaluation.model_version}）` : ""}
         </p>
+        {isLocal ? (
+          <p className="mt-2 rounded-lg border border-app-border bg-app-card p-3 text-xs leading-relaxed text-app-text-muted">
+            Claude APIが未接続のため、この評価は日報・週報の記述内容から
+            <strong className="font-semibold">機械的に算出したもの</strong>です。AIによる評価ではありません。
+            APIキーを設定すると、以降の週から本来のAI評価に切り替わります。
+          </p>
+        ) : null}
       </div>
 
       <Card className="p-5">

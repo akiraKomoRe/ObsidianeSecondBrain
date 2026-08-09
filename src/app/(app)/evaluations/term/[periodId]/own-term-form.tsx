@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScoreDisplay, ScoreSelect } from "@/components/evaluation/score-select";
-import { CATEGORY_LABELS, type EvaluationCategory } from "@/lib/evaluation/score";
+import { CATEGORY_LABELS } from "@/lib/evaluation/score";
 import type { TermEvaluationView } from "@/lib/evaluation/get-term";
 import {
   addTermItem,
@@ -55,71 +55,55 @@ export function CreateSheetForm({ periodId }: { periodId: string }) {
   );
 }
 
-function AddItemForm({ evaluationId, category }: { evaluationId: string; category: EvaluationCategory }) {
-  const [state, formAction, pending] = useActionState(addTermItem, initialState);
-  return (
-    <form action={formAction}>
-      <input type="hidden" name="evaluation_id" value={evaluationId} />
-      <input type="hidden" name="category" value={category} />
-      <Feedback state={state} />
-      <Button type="submit" variant="outline" size="sm" disabled={pending}>
-        <Plus className="h-3.5 w-3.5" />
-        目標を追加
-      </Button>
-    </form>
-  );
-}
+/**
+ * Add / delete / advance each need their own <form>, but they sit visually
+ * inside the big save form -- and a <form> may not be nested inside another
+ * (the browser hoists the inner one out, which breaks hydration and makes the
+ * wrong action fire). So each renders its <form> as a sibling further down the
+ * page and puts only a button in place, tied to it by the HTML `form`
+ * attribute. Same layout, valid markup.
+ */
+type SideForm = {
+  id: string;
+  action: (formData: FormData) => void;
+  fields: Record<string, string>;
+  error: string | null;
+};
 
-function DeleteItemForm({ itemId }: { itemId: string }) {
-  const [, formAction, pending] = useActionState(deleteTermItem, initialState);
+function SideForms({ forms }: { forms: SideForm[] }) {
   return (
-    <form action={formAction}>
-      <input type="hidden" name="item_id" value={itemId} />
-      <Button
-        type="submit"
-        variant="ghost"
-        size="icon"
-        disabled={pending}
-        aria-label="この目標を削除"
-        className="text-app-text-faint hover:text-destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    </form>
-  );
-}
-
-function AdvanceStageForm({
-  evaluationId,
-  nextStage,
-  label,
-}: {
-  evaluationId: string;
-  nextStage: "midterm" | "final";
-  label: string;
-}) {
-  const [state, formAction, pending] = useActionState(advanceStage, initialState);
-  return (
-    <form action={formAction} className="space-y-2">
-      <input type="hidden" name="evaluation_id" value={evaluationId} />
-      <input type="hidden" name="next_stage" value={nextStage} />
-      {state.error ? (
-        <p className="flex items-start gap-1.5 text-sm text-destructive">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          {state.error}
-        </p>
-      ) : null}
-      <Button type="submit" variant="outline" disabled={pending}>
-        {pending ? "処理中..." : label}
-      </Button>
-    </form>
+    <>
+      {forms.map((form) => (
+        <form key={form.id} id={form.id} action={form.action}>
+          {Object.entries(form.fields).map(([name, value]) => (
+            <input key={name} type="hidden" name={name} value={value} />
+          ))}
+        </form>
+      ))}
+      {forms
+        .filter((form) => form.error)
+        .map((form) => (
+          <p key={form.id} className="flex items-start gap-1.5 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            {form.error}
+          </p>
+        ))}
+    </>
   );
 }
 
 export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
   const [state, formAction, pending] = useActionState(saveOwnTermEvaluation, initialState);
+  const [addState, addAction] = useActionState(addTermItem, initialState);
+  const [deleteState, deleteAction] = useActionState(deleteTermItem, initialState);
+  const [advanceState, advanceAction] = useActionState(advanceStage, initialState);
   const { evaluation, items, marksVisible } = view;
   const stage = evaluation.stage;
+
+  // One delete form per goal, so the button knows which row it removes.
+  const deletableIds = items
+    .filter((item) => item.category !== "behavioral")
+    .map((item) => item.id);
 
   // Once the sheet is with the approver, the employee's side is frozen. The
   // manager may already have graded against what was written.
@@ -131,7 +115,8 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
   }));
 
   return (
-    <form action={formAction} className="space-y-4">
+    <div className="space-y-4">
+      <form action={formAction} className="space-y-4">
       <input type="hidden" name="evaluation_id" value={evaluation.id} />
       <input type="hidden" name="stage" value={stage} />
 
@@ -146,7 +131,10 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-border px-5 py-3.5">
             <h2 className="text-md font-semibold text-app-text">{CATEGORY_LABELS[category]}</h2>
             {!locked && stage === "goal_setting" && category !== "behavioral" ? (
-              <AddItemForm evaluationId={evaluation.id} category={category} />
+              <Button type="submit" form={`add-${category}`} variant="outline" size="sm">
+                <Plus className="h-3.5 w-3.5" />
+                目標を追加
+              </Button>
             ) : null}
           </div>
 
@@ -190,7 +178,16 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
                     </div>
 
                     {!locked && stage === "goal_setting" && category !== "behavioral" ? (
-                      <DeleteItemForm itemId={item.id} />
+                      <Button
+                        type="submit"
+                        form={`delete-${item.id}`}
+                        variant="ghost"
+                        size="icon"
+                        aria-label="この目標を削除"
+                        className="text-app-text-faint hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     ) : null}
                   </div>
 
@@ -299,23 +296,58 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
             {pending ? "保存中..." : "保存"}
           </Button>
           {stage === "goal_setting" ? (
-            <AdvanceStageForm
-              evaluationId={evaluation.id}
-              nextStage="midterm"
-              label="目標を確定して中間進捗へ"
-            />
+            <Button type="submit" form="advance-stage" variant="outline">
+              目標を確定して中間進捗へ
+            </Button>
           ) : null}
           {stage === "midterm" ? (
-            <AdvanceStageForm
-              evaluationId={evaluation.id}
-              nextStage="final"
-              label="最終評価の記入へ"
-            />
+            <Button type="submit" form="advance-stage" variant="outline">
+              最終評価の記入へ
+            </Button>
           ) : null}
         </div>
       ) : null}
 
       <Feedback state={state} />
-    </form>
+      </form>
+
+      <SideForms
+        forms={[
+          ...(!locked && stage === "goal_setting"
+            ? ([["quantitative"], ["development"]] as const).map(([category]) => ({
+                id: `add-${category}`,
+                action: addAction,
+                fields: { evaluation_id: evaluation.id, category },
+                error: null,
+              }))
+            : []),
+          ...(!locked && stage === "goal_setting"
+            ? deletableIds.map((itemId) => ({
+                id: `delete-${itemId}`,
+                action: deleteAction,
+                fields: { item_id: itemId },
+                error: null,
+              }))
+            : []),
+          ...(!locked && stage !== "final"
+            ? [
+                {
+                  id: "advance-stage",
+                  action: advanceAction,
+                  fields: {
+                    evaluation_id: evaluation.id,
+                    next_stage: stage === "goal_setting" ? "midterm" : "final",
+                  },
+                  error: null,
+                },
+              ]
+            : []),
+        ]}
+      />
+
+      <Feedback state={addState} />
+      <Feedback state={deleteState} />
+      <Feedback state={advanceState} />
+    </div>
   );
 }

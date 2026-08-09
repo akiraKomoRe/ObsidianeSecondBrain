@@ -3,7 +3,9 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isLocalAiMode } from "@/lib/local/mode";
 import { buildEvaluationPrompt } from "./prompt";
+import { LOCAL_MODEL_VERSION, generateLocalEvaluation } from "./local-generate";
 import type { CriterionScore } from "@/types/database";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-5";
@@ -86,6 +88,27 @@ export async function generateWeeklyEvaluation({
     return { status: "error", message: "no active evaluation criteria configured" };
   }
 
+  // Without an API key, score the same reports locally instead of failing the
+  // whole weekly-report submission. The rows are stamped with a distinct
+  // model_version so the screens can label them rather than pass them off as
+  // AI output -- see local-generate.ts.
+  if (isLocalAiMode()) {
+    const local = generateLocalEvaluation({
+      employeeName: profile.name,
+      dailyReports: dailyList,
+      weeklyReport: weeklyReport ?? null,
+      criteria: criteriaList,
+    });
+    return persist({
+      userId,
+      weekStart,
+      weekEnd,
+      criteriaScores: local.criteriaScores,
+      overallSummary: local.overallSummary,
+      modelVersion: LOCAL_MODEL_VERSION,
+    });
+  }
+
   const prompt = buildEvaluationPrompt({
     employeeName: profile.name,
     weekStart,
@@ -126,22 +149,46 @@ export async function generateWeeklyEvaluation({
       comment: s.comment,
     }));
 
-  const { error: upsertError } = await admin.from("weekly_ai_evaluations").upsert(
-    {
-      user_id: userId,
-      week_start: weekStart,
-      week_end: weekEnd,
-      criteria_scores: criteriaScores,
-      overall_summary: toolInput.overall_summary,
-      model_version: MODEL,
-      generated_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id,week_start" }
-  );
+  return persist({
+    userId,
+    weekStart,
+    weekEnd,
+    criteriaScores,
+    overallSummary: toolInput.overall_summary,
+    modelVersion: MODEL,
+  });
+}
 
-  if (upsertError) {
-    return { status: "error", message: upsertError.message };
-  }
+/** Shared by both paths so the row looks identical whichever produced it. */
+async function persist({
+  userId,
+  weekStart,
+  weekEnd,
+  criteriaScores,
+  overallSummary,
+  modelVersion,
+}: {
+  userId: string;
+  weekStart: string;
+  weekEnd: string;
+  criteriaScores: CriterionScore[];
+  overallSummary: string;
+  modelVersion: string;
+}): Promise<GenerateEvaluationResult> {
+  const { error } = await createAdminClient()
+    .from("weekly_ai_evaluations")
+    .upsert(
+      {
+        user_id: userId,
+        week_start: weekStart,
+        week_end: weekEnd,
+        criteria_scores: criteriaScores,
+        overall_summary: overallSummary,
+        model_version: modelVersion,
+        generated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,week_start" }
+    );
 
-  return { status: "generated" };
+  return error ? { status: "error", message: error.message } : { status: "generated" };
 }

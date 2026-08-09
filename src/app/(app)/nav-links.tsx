@@ -6,6 +6,7 @@ import {
   Users,
   ClipboardList,
   CheckSquare,
+  Settings,
 } from "lucide-react";
 
 import type { UserRole } from "@/types/database";
@@ -23,6 +24,7 @@ export const NAV_ITEMS = [
     icon: CheckSquare,
     roles: ["manager", "admin"] as UserRole[],
   },
+  { href: "/admin", label: "管理", icon: Settings, roles: ["admin"] as UserRole[] },
 ];
 
 export function isNavItemActive(pathname: string, href: string): boolean {

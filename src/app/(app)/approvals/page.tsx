@@ -2,6 +2,7 @@ import { CheckSquare } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireManagerOrAdmin } from "@/lib/team/get-team-member";
+import { relationTo } from "@/lib/evaluation/authz";
 import { formatPeriodLabel, getTermEvaluation, scoreView } from "@/lib/evaluation/get-term";
 import { JOB_GRADE_LABELS, formatPoints } from "@/lib/evaluation/score";
 import { Card } from "@/components/ui/card";
@@ -11,22 +12,32 @@ export default async function ApprovalsPage() {
   await requireManagerOrAdmin();
   const supabase = await createClient();
 
-  // RLS narrows this to the rows this person may approve, so no extra filter
-  // is needed here: a manager only sees their own reports' reports.
+  // RLS lets a manager see their own reports' submissions too -- they are the
+  // ones who submitted them. This screen is specifically the second approver's
+  // queue, so narrow it to evaluations this person actually signs off.
   const { data: pending } = await supabase
     .from("term_evaluations")
     .select("*")
     .eq("status", "pending_approval")
     .order("submitted_for_approval_at");
 
+  const candidates = await Promise.all(
+    (pending ?? []).map(async (evaluation) => ({
+      evaluation,
+      relation: await relationTo(evaluation.user_id),
+    }))
+  );
+
   const rows = await Promise.all(
-    (pending ?? []).map(async (evaluation) => {
-      const [view, { data: subject }] = await Promise.all([
-        getTermEvaluation(evaluation.id),
-        supabase.from("profiles").select("*").eq("id", evaluation.user_id).maybeSingle(),
-      ]);
-      return { view, subject };
-    })
+    candidates
+      .filter(({ relation }) => relation === "second_approver" || relation === "admin")
+      .map(async ({ evaluation }) => {
+        const [view, { data: subject }] = await Promise.all([
+          getTermEvaluation(evaluation.id),
+          supabase.from("profiles").select("*").eq("id", evaluation.user_id).maybeSingle(),
+        ]);
+        return { view, subject };
+      })
   );
 
   return (
