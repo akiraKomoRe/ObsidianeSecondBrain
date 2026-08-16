@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { getTeamMember } from "@/lib/team/get-team-member";
 import { formatPeriodLabel, getOwnTermEvaluation, scoreView } from "@/lib/evaluation/get-term";
 import { JOB_GRADE_LABELS } from "@/lib/evaluation/score";
+import { departmentGoalIndex } from "@/lib/evaluation/department-goals";
 import { TermScoreSummary } from "@/components/evaluation/term-score-summary";
 import { ManagerTermForm } from "./manager-term-form";
 
@@ -18,6 +19,15 @@ export default async function TeamMemberTermDetailPage({
 
   const view = await getOwnTermEvaluation(member.id, periodId);
   if (!view) notFound();
+
+  // 採点画面で「この個人目標はどの部門目標のために立てたのか」を出すための索引。
+  const goalIndex = await departmentGoalIndex(view.items.map((item) => item.department_goal_id));
+  const departmentGoals = Object.fromEntries(
+    [...goalIndex].map(([id, goal]) => [
+      id,
+      { title: goal.title, departmentName: goal.department?.name ?? null },
+    ])
+  );
 
   return (
     <div className="space-y-5">
@@ -41,7 +51,7 @@ export default async function TeamMemberTermDetailPage({
         <TermScoreSummary score={scoreView(view, "manager")} label="上長評価" tone="final" />
       </div>
 
-      <ManagerTermForm view={view} />
+      <ManagerTermForm view={view} departmentGoals={departmentGoals} />
     </div>
   );
 }

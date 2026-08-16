@@ -29,7 +29,8 @@ export async function updateMember(_prev: AdminState, formData: FormData): Promi
 
   const id = String(formData.get("id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const department = String(formData.get("department") ?? "").trim();
+  const rawDepartment = String(formData.get("department_id") ?? "");
+  const departmentId = rawDepartment === "" ? null : rawDepartment;
   const role = String(formData.get("role") ?? "") as UserRole;
   const jobGrade = String(formData.get("job_grade") ?? "") as JobGrade;
   const rawManager = String(formData.get("manager_id") ?? "");
@@ -40,8 +41,14 @@ export async function updateMember(_prev: AdminState, formData: FormData): Promi
   if (!JOB_GRADES.includes(jobGrade)) return { error: "役職の値が不正です。", success: false };
 
   const supabase = await createClient();
-  const { data: everyone } = await supabase.from("profiles").select("*");
+  const [{ data: everyone }, { data: departments }] = await Promise.all([
+    supabase.from("profiles").select("*"),
+    supabase.from("departments").select("*"),
+  ]);
   const profiles = everyone ?? [];
+  if (departmentId && !departments?.some((d) => d.id === departmentId)) {
+    return { error: "指定された部署が見つかりません。", success: false };
+  }
   if (!profiles.some((p) => p.id === id)) {
     return { error: "対象の社員が見つかりません。", success: false };
   }
@@ -51,7 +58,16 @@ export async function updateMember(_prev: AdminState, formData: FormData): Promi
 
   const { data, error } = await supabase
     .from("profiles")
-    .update({ name, department: department || null, role, job_grade: jobGrade, manager_id: managerId })
+    .update({
+      name,
+      department_id: departmentId,
+      // 旧 text 列も同時に更新して、id と名前が食い違わないようにしておく
+      // （0006 のコメントどおり、この列は次期に落とす）。
+      department: departments?.find((d) => d.id === departmentId)?.name ?? null,
+      role,
+      job_grade: jobGrade,
+      manager_id: managerId,
+    })
     .eq("id", id)
     .select("id");
 
@@ -148,5 +164,127 @@ export async function setPeriodStatus(_prev: AdminState, formData: FormData): Pr
   if (error || !data?.length) return { error: "更新に失敗しました。", success: false };
 
   revalidatePath("/admin/periods");
+  return { error: null, success: true };
+}
+
+// ---------------------------------------------------------------------------
+// 部署マスタ
+//
+// 部門目標の持ち主であり、部下がどの部門目標を選べるかを決める入れ子構造の
+// 出どころ。役職や上長と同じく、ここを触れるのは管理者だけ。
+
+export async function saveDepartment(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const rawParent = String(formData.get("parent_id") ?? "");
+  const parentId = rawParent === "" ? null : rawParent;
+  const rawHead = String(formData.get("head_id") ?? "");
+  const headId = rawHead === "" ? null : rawHead;
+
+  if (!name) return { error: "部署名を入力してください。", success: false };
+  if (id && parentId === id) {
+    return { error: "自分自身を上位部署にはできません。", success: false };
+  }
+
+  const supabase = await createClient();
+  const { data: departments } = await supabase.from("departments").select("*");
+  const all = departments ?? [];
+
+  // 部署の親子が輪になると、部門目標を書ける範囲を決める上向きの探索が
+  // 止まらなくなる。ポリシー側にも循環対策は入れてあるが、そもそも
+  // 作らせないほうがよい。
+  if (id && parentId) {
+    const seen = new Set<string>([id]);
+    let cursor: string | null = parentId;
+    while (cursor) {
+      if (seen.has(cursor)) {
+        return { error: "部署の親子関係が循環します。", success: false };
+      }
+      seen.add(cursor);
+      cursor = all.find((d) => d.id === cursor)?.parent_id ?? null;
+    }
+  }
+
+  const patch = { name, parent_id: parentId, head_id: headId };
+
+  if (id) {
+    const { data, error } = await supabase
+      .from("departments")
+      .update(patch)
+      .eq("id", id)
+      .select("id");
+    if (error || !data?.length) {
+      return { error: error?.message ?? "更新に失敗しました。", success: false };
+    }
+  } else {
+    const { data, error } = await supabase
+      .from("departments")
+      .insert({ ...patch, sort_order: (all.length + 1) * 10 })
+      .select("id");
+    if (error || !data?.length) {
+      return { error: error?.message ?? "追加に失敗しました。", success: false };
+    }
+  }
+
+  revalidatePath("/admin/departments");
+  revalidatePath("/team/department-goals");
+  return { error: null, success: true };
+}
+
+// ---------------------------------------------------------------------------
+// 会社休日
+//
+// 登録された日は全社員の稼働日から外れ、日報の分母にも入らなくなる。
+
+export async function addCompanyHoliday(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const holidayOn = String(formData.get("holiday_on") ?? "").trim();
+  const label = String(formData.get("label") ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayOn)) {
+    return { error: "日付を選択してください。", success: false };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("company_holidays")
+    .upsert({ holiday_on: holidayOn, label }, { onConflict: "holiday_on" })
+    .select("holiday_on");
+
+  if (error || !data?.length) {
+    return { error: error?.message ?? "登録に失敗しました。", success: false };
+  }
+
+  revalidatePath("/admin/holidays");
+  revalidatePath("/");
+  return { error: null, success: true };
+}
+
+export async function deleteCompanyHoliday(
+  _prev: AdminState,
+  formData: FormData
+): Promise<AdminState> {
+  if (!(await requireAdmin())) return { error: "管理者のみ実行できます。", success: false };
+
+  const holidayOn = String(formData.get("holiday_on") ?? "");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("company_holidays")
+    .delete()
+    .eq("holiday_on", holidayOn)
+    .select("holiday_on");
+
+  if (error || !data?.length) return { error: "削除に失敗しました。", success: false };
+
+  revalidatePath("/admin/holidays");
+  revalidatePath("/");
   return { error: null, success: true };
 }

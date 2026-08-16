@@ -25,6 +25,7 @@ const SATO = "33333333-3333-4333-8333-333333333333"; // 山田の上長
 const TANAKA = "44444444-4444-4444-8444-444444444444"; // 佐藤の上長 = 二次承認者
 const ADMIN = "55555555-5555-4555-8555-555555555555";
 const TERM = "bbbbbbbb-0000-4000-8000-000000000001"; // 山田の2026上期
+const TERM_PERIOD_CLOSED = "aaaaaaaa-0000-4000-8000-000000000001"; // 2026上期（締切済み）
 
 const as = (id: string | null) => createLocalClient(id ? { id } : null);
 
@@ -337,6 +338,108 @@ describe("承認フロー中の書き込み可否（監査で見つかった不�
       .select("id");
     assert.equal(rows({ data: byAdmin }).length, 1);
     assert.equal(loadTables().profiles.find((p) => p.id === YAMADA)!.job_grade, "shunin");
+  });
+});
+
+describe("部門目標の編集権限", () => {
+  const HONBU = "dddddddd-0000-4000-8000-000000000001"; // 工事本部（田中が部長）
+  const ICHIKA = "dddddddd-0000-4000-8000-000000000002"; // 工事第一課（佐藤が課長）
+  const H2 = "aaaaaaaa-0000-4000-8000-000000000002"; // 開いている期
+
+  const addGoal = (viewerId: string, departmentId: string, periodId = H2) =>
+    as(viewerId)
+      .from("department_goals")
+      .insert({ department_id: departmentId, period_id: periodId, title: "テスト目標" });
+
+  test("部長は自部署の部門目標を追加できる", async () => {
+    const { error } = await addGoal(TANAKA, HONBU);
+    assert.equal(error, null);
+  });
+
+  test("部長は配下の課の部門目標も追加できる（上位部署の長として）", async () => {
+    const { error } = await addGoal(TANAKA, ICHIKA);
+    assert.equal(error, null, "本部長が配下の課の目標を立てられない");
+  });
+
+  test("課長は自分の課の部門目標を追加できる", async () => {
+    const { error } = await addGoal(SATO, ICHIKA);
+    assert.equal(error, null);
+  });
+
+  /**
+   * ここが肝。部門目標は全社員が読めるが、書けるのはその部署と上位部署の長だけ。
+   * 課長が本部の目標を書き換えられると、部長の方針を部下が上書きできてしまう。
+   */
+  test("課長は上位部署（本部）の部門目標を追加できない", async () => {
+    const { error } = await addGoal(SATO, HONBU);
+    assert.ok(error, "課長が本部の目標を立てられてしまった");
+  });
+
+  test("一般社員はどの部署の部門目標も追加できない", async () => {
+    for (const dept of [HONBU, ICHIKA]) {
+      const { error } = await addGoal(YAMADA, dept);
+      assert.ok(error, `一般社員が ${dept} の目標を立てられてしまった`);
+    }
+  });
+
+  test("管理者はどの部署の部門目標も追加できる", async () => {
+    const { error } = await addGoal(ADMIN, ICHIKA);
+    assert.equal(error, null);
+  });
+
+  /**
+   * 締めた期の目標が動かせると、確定済みの期末評価の根拠があとから書き換わる。
+   * 規程 第12条の不服申立てで見るべきものが消えてしまう。
+   */
+  test("締切済みの期は部長でも部門目標を追加できない", async () => {
+    const { error } = await addGoal(TANAKA, HONBU, TERM_PERIOD_CLOSED);
+    assert.ok(error, "締切済みの期に目標を足せてしまった");
+  });
+
+  test("部門目標は全社員が読める（自分の目標の紐付け先を選ぶために要る）", async () => {
+    for (const viewer of [YAMADA, SUZUKI, SATO, TANAKA, ADMIN]) {
+      const goals = rows(await as(viewer).from("department_goals").select("*"));
+      assert.ok(goals.length > 0, `${viewer} が部門目標を読めない`);
+    }
+  });
+
+  /**
+   * 0006 の CHECK 制約と同じこと。ポリシー（誰が触れるか）とは別の層で、
+   * 「その行がそもそも成立するか」を見る。
+   *
+   * シートを draft に戻してから試すのが要点。承認済みのままだとポリシーの
+   * 段階で1行も掴めず、CHECK まで到達しないので何も検証できない
+   * ——「エラーが出ない」を「制約が効いた」と読み違えるところだった。
+   */
+  test("部門定量項目以外に部門目標を紐づけられない", async () => {
+    const tables = loadTables();
+    tables.term_evaluations.find((e) => e.id === TERM)!.status = "draft";
+    const behavioral = tables.term_evaluation_items.find(
+      (item) => item.term_evaluation_id === TERM && item.category === "behavioral"
+    )!;
+
+    const { error } = await as(YAMADA)
+      .from("term_evaluation_items")
+      .update({ department_goal_id: "eeeeeeee-0000-4000-8000-000000000011" })
+      .eq("id", behavioral.id);
+
+    assert.ok(error, "行動指針の項目に部門目標が紐づいてしまった");
+    assert.equal(error?.code, "23514");
+  });
+
+  test("部門定量項目には紐づけられる", async () => {
+    const tables = loadTables();
+    tables.term_evaluations.find((e) => e.id === TERM)!.status = "draft";
+    const quantitative = tables.term_evaluation_items.find(
+      (item) => item.term_evaluation_id === TERM && item.category === "quantitative"
+    )!;
+
+    const { error } = await as(YAMADA)
+      .from("term_evaluation_items")
+      .update({ department_goal_id: "eeeeeeee-0000-4000-8000-000000000011" })
+      .eq("id", quantitative.id);
+
+    assert.equal(error, null);
   });
 });
 

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { JobGrade, Profile, UserRole } from "@/types/database";
+import type { Department, JobGrade, Profile, UserRole } from "@/types/database";
 
 const initialState: AdminState = { error: null, success: false };
 
@@ -34,10 +34,12 @@ const selectClass =
 export function MemberForm({
   profile,
   colleagues,
+  departments,
   managerName,
   gradeLabel,
 }: {
   profile: Profile;
+  departments: Department[];
   /** Everyone except this person -- you cannot be your own manager. */
   colleagues: Profile[];
   managerName: string | null;
@@ -64,11 +66,24 @@ export function MemberForm({
 
         <div className="space-y-1.5">
           <Label htmlFor={`department-${profile.id}`}>部署</Label>
-          <Input
+          {/*
+            フリーテキストから部署マスタの選択に変えた。文字列のままだと
+            「工事第一課」と「工事1課」が別部署として扱われ、部門目標の
+            紐付け先が割れる。
+          */}
+          <select
             id={`department-${profile.id}`}
-            name="department"
-            defaultValue={profile.department ?? ""}
-          />
+            name="department_id"
+            defaultValue={profile.department_id ?? ""}
+            className={selectClass}
+          >
+            <option value="">（未所属）</option>
+            {departments.map((department) => (
+              <option key={department.id} value={department.id}>
+                {department.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1.5">

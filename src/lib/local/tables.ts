@@ -2,6 +2,8 @@ import type {
   BehaviorGuideline,
   CompanyHoliday,
   DailyReport,
+  Department,
+  DepartmentGoal,
   EvaluationCriterion,
   EvaluationPeriod,
   JobGradeWeights,
@@ -27,6 +29,8 @@ export type LocalTables = {
   evaluation_criteria: EvaluationCriterion[];
   weekly_ai_evaluations: WeeklyAiEvaluation[];
   evaluation_periods: EvaluationPeriod[];
+  departments: Department[];
+  department_goals: DepartmentGoal[];
   company_holidays: CompanyHoliday[];
   personal_leaves: PersonalLeave[];
   job_grade_weights: JobGradeWeights[];
@@ -53,6 +57,8 @@ export const PRIMARY_KEY: Record<TableName, string> = {
   evaluation_criteria: "id",
   weekly_ai_evaluations: "id",
   evaluation_periods: "id",
+  departments: "id",
+  department_goals: "id",
   // 会社休日は日付そのものが主キー（1日1行）。個人の休暇は user_id と対で
   // 一意なので、複合キーを表現できないこの表では leave_on を主キーとし、
   // 重複は UNIQUE_KEYS 側で弾く。
@@ -76,7 +82,15 @@ export const PRIMARY_KEY: Record<TableName, string> = {
  * belongs in this map.
  */
 export const COLUMN_DEFAULTS: Partial<Record<TableName, Row>> = {
-  profiles: { department: null, manager_id: null, role: "employee", job_grade: "ippan" },
+  profiles: {
+    department: null,
+    department_id: null,
+    manager_id: null,
+    role: "employee",
+    job_grade: "ippan",
+  },
+  departments: { parent_id: null, head_id: null, sort_order: 0 },
+  department_goals: { description: "", target_metric: "", sort_order: 0, created_by: null },
   daily_reports: { work_hours: null, issues: null, tomorrow_plan: null },
   weekly_reports: { self_reflection: null, submitted_at: null },
   evaluation_criteria: { description: null, category: null, weight: 1, is_active: true },
@@ -97,6 +111,7 @@ export const COLUMN_DEFAULTS: Partial<Record<TableName, Row>> = {
     final_snapshot: null,
   },
   term_evaluation_items: {
+    department_goal_id: null,
     expected_behavior: null,
     midterm_progress: null,
     midterm_self_score: null,
@@ -119,6 +134,7 @@ export const UNIQUE_KEYS: Partial<Record<TableName, string[][]>> = {
   evaluation_criteria: [["key"]],
   weekly_ai_evaluations: [["user_id", "week_start"]],
   evaluation_periods: [["year", "half"]],
+  departments: [["name"]],
   company_holidays: [["holiday_on"]],
   personal_leaves: [["user_id", "leave_on"]],
   behavior_guidelines: [["sort_order", "job_grade"]],

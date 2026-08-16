@@ -28,6 +28,9 @@ P supabase/tests/00_supabase_stubs.sql
 P supabase/migrations/0001_init.sql
 P supabase/migrations/0002_manager_dashboard.sql
 P supabase/migrations/0003_term_evaluation.sql
+P supabase/migrations/0004_admin_and_approver_access.sql
+P supabase/migrations/0005_prompt_version_and_attendance.sql
+P supabase/migrations/0006_department_goals.sql
 
 # Supabaseが既定で行っているGRANT相当を再現する
 su postgres -c "psql -h $PGDIR -p 55432 -d postgres -q -c '
@@ -58,6 +61,10 @@ P supabase/tests/02_term_evaluation_seed.sql
 | 承認依頼後に本人が自分の目標をUPDATE | 0行（凍結される） |
 | シードを2回流す | `behavior_guidelines` は30件のまま |
 | 一般職でシート作成 | 行動指針項目が**5件**生成される（0件なら未シード） |
+| 行動指針の項目に `department_goal_id` を付ける | CHECK制約で拒否される |
+| 締切済みの期の部門目標をUPDATE | トリガーで拒否される |
+| `0006` を2回流す | エラーなし（`drop policy if exists` で冪等） |
+| `0006` 適用後 | `profiles.department` の文字列から `department_id` が埋まる |
 
 ## 注意
 

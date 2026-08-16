@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { AlertCircle, CheckCircle2, Eye, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, Send, Target } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,14 @@ function DiscloseForm({ evaluationId }: { evaluationId: string }) {
   );
 }
 
-export function ManagerTermForm({ view }: { view: TermEvaluationView }) {
+export function ManagerTermForm({
+  view,
+  departmentGoals,
+}: {
+  view: TermEvaluationView;
+  /** この評価シートの部門定量項目が紐づいている部門目標（id → 目標）。 */
+  departmentGoals: Record<string, { title: string; departmentName: string | null }>;
+}) {
   const [state, formAction, pending] = useActionState(saveManagerMarks, initialState);
   const { evaluation, items } = view;
 
@@ -116,6 +123,22 @@ export function ManagerTermForm({ view }: { view: TermEvaluationView }) {
                       </p>
                       {item.expected_behavior ? (
                         <p className="mt-1 text-sm text-app-text-muted">{item.expected_behavior}</p>
+                      ) : null}
+                      {/*
+                        何のために立てた目標なのかを採点者に見せる。部門定量項目を
+                        目標文だけで採点すると、部門目標に効いたかどうかではなく
+                        「やったか・やらなかったか」の判定になってしまう。
+                      */}
+                      {item.department_goal_id && departmentGoals[item.department_goal_id] ? (
+                        <p className="mt-1.5 flex items-start gap-1.5 text-xs text-app-text-muted">
+                          <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-app-text-faint" />
+                          <span>
+                            <span className="text-app-text-faint">
+                              {departmentGoals[item.department_goal_id].departmentName ?? "部門"}目標:
+                            </span>{" "}
+                            {departmentGoals[item.department_goal_id].title}
+                          </span>
+                        </p>
                       ) : null}
                     </div>
 

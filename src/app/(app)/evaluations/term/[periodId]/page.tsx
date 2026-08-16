@@ -6,6 +6,8 @@ import { getCurrentProfile } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { formatPeriodLabel, getOwnTermEvaluation, scoreView } from "@/lib/evaluation/get-term";
 import { JOB_GRADE_LABELS } from "@/lib/evaluation/score";
+import { selectableDepartmentGoals } from "@/lib/evaluation/department-goals";
+import { DepartmentGoalPanel } from "@/components/evaluation/department-goal-panel";
 import { TermScoreSummary } from "@/components/evaluation/term-score-summary";
 import { Card } from "@/components/ui/card";
 import { CreateSheetForm, OwnTermSheetForm } from "./own-term-form";
@@ -27,6 +29,8 @@ export default async function OwnTermEvaluationPage({
   if (!period) notFound();
 
   const view = await getOwnTermEvaluation(profile.id, periodId);
+  // 自部署とその上位部署の、この期の部門目標。部門定量項目の紐付け先になる。
+  const departmentGoals = await selectableDepartmentGoals(profile.department_id, periodId);
 
   return (
     <div className="space-y-5">
@@ -67,7 +71,9 @@ export default async function OwnTermEvaluationPage({
             </p>
           ) : null}
 
-          <OwnTermSheetForm view={view} />
+          <DepartmentGoalPanel goals={departmentGoals} />
+
+          <OwnTermSheetForm view={view} departmentGoals={departmentGoals} />
         </>
       )}
     </div>

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-user";
 import { isDenied, requireOwnDraft } from "@/lib/evaluation/authz";
+import { selectableDepartmentGoals } from "@/lib/evaluation/department-goals";
 import type { EvaluationCategory, TermEvaluationItem } from "@/types/database";
 
 export type TermFormState = { error: string | null; success: boolean };
@@ -154,6 +155,28 @@ export async function deleteTermItem(_prev: TermFormState, formData: FormData): 
   return { error: null, success: true };
 }
 
+/**
+ * 部門目標の紐付け。
+ *
+ * フォームにその項目のselectが無ければ（＝部門定量項目ではない、あるいは
+ * 選べる部門目標が1つも無い）キーごと返さない。`undefined` を混ぜると
+ * 既存の紐付けを黙って消してしまうので、「送られてこなかった」と
+ * 「未選択にされた」を分けて扱う。
+ */
+function departmentGoalPatch(
+  formData: FormData,
+  itemId: string,
+  selectable: Set<string> | null
+): Pick<TermEvaluationItem, "department_goal_id"> | Record<string, never> {
+  const key = `department_goal_${itemId}`;
+  if (!formData.has(key)) return {};
+  const raw = String(formData.get(key) ?? "").trim();
+  // 選べないはずの目標を指してきたら「未選択」に倒す。保存自体を失敗させると
+  // 他の項目に書いた内容まで巻き添えで失われる。
+  if (raw && selectable && !selectable.has(raw)) return { department_goal_id: null };
+  return { department_goal_id: raw || null };
+}
+
 function parseScore(raw: FormDataEntryValue | null): number | null {
   const value = String(raw ?? "").trim();
   if (!value) return null;
@@ -179,10 +202,29 @@ export async function saveOwnTermEvaluation(
 
   const supabase = await createClient();
 
+  // 期首の保存でだけ、部門目標の紐付け先を検証する。フォームには自部署と
+  // 上位部署の目標しか出していないが、出していないことは検証ではない ——
+  // 直接POSTすれば無関係な部署の目標を指せてしまう。
+  let selectableGoalIds: Set<string> | null = null;
+  if (stage === "goal_setting") {
+    const profile = await getCurrentProfile();
+    const goals = await selectableDepartmentGoals(
+      profile.department_id,
+      allowed.evaluation.period_id
+    );
+    selectableGoalIds = new Set(goals.map((goal) => goal.id));
+  }
+
   for (const itemId of itemIds) {
     const patch: Partial<TermEvaluationItem> =
       stage === "goal_setting"
-        ? { title: String(formData.get(`title_${itemId}`) ?? "").trim() }
+        ? {
+            title: String(formData.get(`title_${itemId}`) ?? "").trim(),
+            // 部門目標との紐付けは期首にだけ書き換わる。中間・期末で
+            // 紐付け先が動くと、何に向けて立てた目標だったのかが後から
+            // 変わってしまう。
+            ...departmentGoalPatch(formData, itemId, selectableGoalIds),
+          }
         : stage === "midterm"
           ? {
               midterm_progress: String(formData.get(`midterm_progress_${itemId}`) ?? "").trim(),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { AlertCircle, CheckCircle2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Plus, Target, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScoreDisplay, ScoreSelect } from "@/components/evaluation/score-select";
 import { CATEGORY_LABELS } from "@/lib/evaluation/score";
 import type { TermEvaluationView } from "@/lib/evaluation/get-term";
+import type { DepartmentGoalWithDept } from "@/lib/evaluation/department-goals";
 import {
   addTermItem,
   advanceStage,
@@ -92,7 +93,14 @@ function SideForms({ forms }: { forms: SideForm[] }) {
   );
 }
 
-export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
+export function OwnTermSheetForm({
+  view,
+  departmentGoals,
+}: {
+  view: TermEvaluationView;
+  /** 自部署と上位部署の、この期の部門目標。部門定量項目の紐付け先。 */
+  departmentGoals: DepartmentGoalWithDept[];
+}) {
   const [state, formAction, pending] = useActionState(saveOwnTermEvaluation, initialState);
   const [addState, addAction] = useActionState(addTermItem, initialState);
   const [deleteState, deleteAction] = useActionState(deleteTermItem, initialState);
@@ -175,6 +183,15 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
                           {item.title || "(未記入)"}
                         </p>
                       )}
+
+                      {category === "quantitative" ? (
+                        <DepartmentGoalField
+                          itemId={item.id}
+                          selected={item.department_goal_id}
+                          goals={departmentGoals}
+                          editable={stage === "goal_setting" && !locked}
+                        />
+                      ) : null}
                     </div>
 
                     {!locked && stage === "goal_setting" && category !== "behavioral" ? (
@@ -348,6 +365,83 @@ export function OwnTermSheetForm({ view }: { view: TermEvaluationView }) {
       <Feedback state={addState} />
       <Feedback state={deleteState} />
       <Feedback state={advanceState} />
+    </div>
+  );
+}
+
+const selectClass =
+  "h-9 w-full rounded-md border border-app-border bg-app-card px-3 text-sm text-app-text " +
+  "focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/30 focus-visible:outline-none";
+
+/**
+ * 部門定量項目を、部長が定めた部門目標に紐づける。
+ *
+ * この区分は名前に反して部門と無関係だった -- 本人が自由記述で立てるだけで、
+ * 何のための目標なのかがシートから読み取れなかった。ここで紐づけておくと、
+ * 上長が採点するときも「部門目標に対してどうだったか」で見られる。
+ *
+ * 未選択のままでも保存できる。部門目標がまだ立っていない期や、どの部門目標にも
+ * 直接は結びつかない個人目標があるので、必須にはしない。
+ */
+function DepartmentGoalField({
+  itemId,
+  selected,
+  goals,
+  editable,
+}: {
+  itemId: string;
+  selected: string | null;
+  goals: DepartmentGoalWithDept[];
+  editable: boolean;
+}) {
+  const current = goals.find((goal) => goal.id === selected) ?? null;
+
+  if (!editable) {
+    if (!current) return null;
+    return (
+      <p className="flex items-start gap-1.5 pt-0.5 text-xs text-app-text-muted">
+        <Target className="mt-0.5 h-3.5 w-3.5 shrink-0 text-app-text-faint" />
+        <span>
+          <span className="text-app-text-faint">{current.department?.name ?? "部門"}目標:</span>{" "}
+          {current.title}
+        </span>
+      </p>
+    );
+  }
+
+  if (goals.length === 0) {
+    return (
+      <p className="pt-1 text-xs text-app-text-faint">
+        この期の部門目標がまだ登録されていません。部門目標が登録されると、ここで紐付けを選べます。
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5 pt-1">
+      <Label htmlFor={`department_goal_${itemId}`}>紐づく部門目標</Label>
+      <select
+        // key に保存値を混ぜて、保存後に必ず作り直させる。
+        // <select> の defaultValue はマウント時にしか効かないので、これが無いと
+        // 保存はできているのに画面は「（選択しない）」のまま、という食い違いが
+        // 残る（下の達成基準だけ正しく出て、余計に混乱する）。
+        key={`${itemId}-${selected ?? "none"}`}
+        id={`department_goal_${itemId}`}
+        name={`department_goal_${itemId}`}
+        defaultValue={selected ?? ""}
+        className={selectClass}
+      >
+        <option value="">（選択しない）</option>
+        {goals.map((goal) => (
+          <option key={goal.id} value={goal.id}>
+            {goal.department?.name ? `[${goal.department.name}] ` : ""}
+            {goal.title}
+          </option>
+        ))}
+      </select>
+      {current?.target_metric ? (
+        <p className="text-xs text-app-text-faint">部門の達成基準: {current.target_metric}</p>
+      ) : null}
     </div>
   );
 }

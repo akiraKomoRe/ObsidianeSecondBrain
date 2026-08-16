@@ -45,6 +45,29 @@ function isOversightOf(ctx: Ctx, targetUserId: string): boolean {
   return isManagerOf(ctx, targetUserId) || isSecondApproverOf(ctx, targetUserId) || isAdmin(ctx);
 }
 
+/**
+ * is_department_head_of(): the viewer heads this department or one above it.
+ *
+ * The walk upward is the point: 部長 of 工事本部 may set goals for 工事第一課
+ * below it, because a 本部 target is what the 課 targets are meant to serve.
+ * Mirrors the recursive CTE in migration 0006.
+ */
+function isDepartmentHeadOf(ctx: Ctx, departmentId: unknown): boolean {
+  const seen = new Set<string>();
+  let current = ctx.tables.departments.find((d) => d.id === departmentId) ?? null;
+  while (current && !seen.has(current.id)) {
+    if (current.head_id === ctx.viewerId) return true;
+    seen.add(current.id); // 親子が循環しても止まるように
+    current = ctx.tables.departments.find((d) => d.id === current!.parent_id) ?? null;
+  }
+  return false;
+}
+
+/** その期が締まっているか。締まった期の部門目標は誰も動かせない。 */
+function isClosedPeriod(ctx: Ctx, periodId: unknown): boolean {
+  return ctx.tables.evaluation_periods.find((p) => p.id === periodId)?.status === "closed";
+}
+
 function evaluationOf(ctx: Ctx, termEvaluationId: unknown) {
   return ctx.tables.term_evaluations.find((e) => e.id === termEvaluationId) ?? null;
 }
@@ -80,6 +103,20 @@ const RULES: Record<TableName, Rules> = {
   job_grade_weights: READ_ONLY_MASTER,
   behavior_guidelines: READ_ONLY_MASTER,
   evaluation_periods: { select: () => true, write: (_row, ctx) => isAdmin(ctx) },
+
+  // 部署も部門目標も全社員が読める。読めないと、自分の部門定量目標を何に
+  // 紐づけるべきか選べない。制限がかかるのは書き込み側だけ。
+  departments: { select: () => true, write: (_row, ctx) => isAdmin(ctx) },
+
+  department_goals: {
+    select: () => true,
+    write: (row, ctx) => {
+      // 締めた期の目標を動かせてしまうと、確定済みの期末評価の根拠が
+      // あとから書き換わる。規程 第12条の不服申立てで見るものが消える。
+      if (isClosedPeriod(ctx, row.period_id)) return false;
+      return isDepartmentHeadOf(ctx, row.department_id) || isAdmin(ctx);
+    },
+  },
 
   // 会社休日は秘密ではない -- 今日日報を出す義務があるかを全員が知る必要がある。
   // 編集は総務（admin）だけ。
@@ -159,6 +196,35 @@ const PRIVILEGED_COLUMNS: Partial<Record<TableName, string[]>> = {
   profiles: ["role", "job_grade", "manager_id"],
 };
 
+/**
+ * CHECK constraints, evaluated on the row as it would be stored.
+ *
+ * Distinct from the policies above, and evaluated at a different moment: a
+ * policy asks "may this viewer touch this row", a CHECK asks "is the resulting
+ * row legal at all" -- so it has to see the row *after* the patch is applied,
+ * not before. Getting that wrong is how the first version of this let a
+ * 行動指針 row take a department goal: the pre-update row had no goal on it, so
+ * the rule passed and the illegal value landed anyway.
+ */
+const CHECKS: Partial<Record<TableName, ((row: Row) => string | null)[]>> = {
+  term_evaluation_items: [
+    // 0006: check (department_goal_id is null or category = 'quantitative')
+    (row) =>
+      row.department_goal_id != null && row.category !== "quantitative"
+        ? "term_evaluation_items_goal_only_quantitative"
+        : null,
+  ],
+};
+
+/** Returns the violated constraint name, or null when the row is legal. */
+export function violatedCheck(table: TableName, row: Row): string | null {
+  for (const check of CHECKS[table] ?? []) {
+    const violated = check(row);
+    if (violated) return violated;
+  }
+  return null;
+}
+
 /** Returns the offending column, or null when the update is allowed. */
 export function blockedColumn(
   table: TableName,
@@ -173,4 +239,10 @@ export function blockedColumn(
   return guarded.find((column) => column in after && after[column] !== before[column]) ?? null;
 }
 
-export const policyHelpers = { isManagerOf, isSecondApproverOf, isAdmin, isOversightOf };
+export const policyHelpers = {
+  isManagerOf,
+  isSecondApproverOf,
+  isAdmin,
+  isOversightOf,
+  isDepartmentHeadOf,
+};

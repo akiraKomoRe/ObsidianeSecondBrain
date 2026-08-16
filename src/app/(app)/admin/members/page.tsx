@@ -5,7 +5,10 @@ import { MemberForm } from "./member-form";
 
 export default async function AdminMembersPage() {
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("*").order("name");
+  const [{ data }, { data: departments }] = await Promise.all([
+    supabase.from("profiles").select("*").order("name"),
+    supabase.from("departments").select("*").order("sort_order"),
+  ]);
   const profiles = data ?? [];
 
   const nameById = new Map(profiles.map((p) => [p.id, p.name]));
@@ -36,6 +39,7 @@ export default async function AdminMembersPage() {
             key={profile.id}
             profile={profile}
             colleagues={profiles.filter((p) => p.id !== profile.id)}
+            departments={departments ?? []}
             managerName={profile.manager_id ? (nameById.get(profile.manager_id) ?? null) : null}
             gradeLabel={JOB_GRADE_LABELS[profile.job_grade]}
           />

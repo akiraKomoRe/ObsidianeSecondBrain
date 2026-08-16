@@ -24,6 +24,14 @@ const ID = {
   sato: "33333333-3333-4333-8333-333333333333",
   tanaka: "44444444-4444-4444-8444-444444444444",
   admin: "55555555-5555-4555-8555-555555555555",
+  deptHonbu: "dddddddd-0000-4000-8000-000000000001",
+  deptIchika: "dddddddd-0000-4000-8000-000000000002",
+  deptKikaku: "dddddddd-0000-4000-8000-000000000003",
+  goalSafety: "eeeeeeee-0000-4000-8000-000000000001",
+  goalCost: "eeeeeeee-0000-4000-8000-000000000002",
+  goalHandover: "eeeeeeee-0000-4000-8000-000000000003",
+  goalH1Recruit: "eeeeeeee-0000-4000-8000-000000000011",
+  goalH1Training: "eeeeeeee-0000-4000-8000-000000000012",
   periodH1: "aaaaaaaa-0000-4000-8000-000000000001",
   periodH2: "aaaaaaaa-0000-4000-8000-000000000002",
   termYamadaH1: "bbbbbbbb-0000-4000-8000-000000000001",
@@ -119,6 +127,8 @@ function behaviorGuidelines(): BehaviorGuideline[] {
 const H1_GOALS: {
   category: "quantitative" | "behavioral" | "development";
   title: string;
+  /** その個人目標がどの部門目標のために立てられたか。定量項目にのみ付く。 */
+  departmentGoalId?: string;
   selfComment: string;
   selfScore: number;
   managerComment: string;
@@ -126,6 +136,7 @@ const H1_GOALS: {
 }[] = [
   {
     category: "quantitative",
+    departmentGoalId: ID.goalH1Training,
     title: "研修の均質化を図るため、新入社員向け動画研修教材の素材確認をする",
     selfComment:
       "施工マニュアル動画の制作に着手し、撮影から編集までの運用体制を構築して順次作成を進めています。",
@@ -135,6 +146,7 @@ const H1_GOALS: {
   },
   {
     category: "quantitative",
+    departmentGoalId: ID.goalH1Recruit,
     title: "採用パンフレットのデザインから入稿データ作成までを完了させる",
     selfComment: "印刷会社の要件に合わせた入稿データの仕様調整を担当し、手配まで滞りなく進めました。",
     selfScore: 3,
@@ -342,6 +354,7 @@ export function buildSeed(): LocalTables {
       role: "manager",
       job_grade: "bucho",
       department: "工事本部",
+      department_id: ID.deptHonbu,
       manager_id: null,
       created_at: NOW,
     },
@@ -352,6 +365,7 @@ export function buildSeed(): LocalTables {
       role: "manager",
       job_grade: "kacho",
       department: "工事第一課",
+      department_id: ID.deptIchika,
       manager_id: ID.tanaka,
       created_at: NOW,
     },
@@ -362,6 +376,7 @@ export function buildSeed(): LocalTables {
       role: "employee",
       job_grade: "ippan",
       department: "工事第一課",
+      department_id: ID.deptIchika,
       manager_id: ID.sato,
       created_at: NOW,
     },
@@ -372,6 +387,7 @@ export function buildSeed(): LocalTables {
       role: "employee",
       job_grade: "shunin",
       department: "工事第一課",
+      department_id: ID.deptIchika,
       manager_id: ID.sato,
       created_at: NOW,
     },
@@ -382,6 +398,7 @@ export function buildSeed(): LocalTables {
       role: "admin",
       job_grade: "ippan",
       department: "経営企画室",
+      department_id: ID.deptKikaku,
       manager_id: null,
       created_at: NOW,
     },
@@ -507,6 +524,9 @@ export function buildSeed(): LocalTables {
         category: goal.category,
         sort_order: sortOrder,
         title: goal.title,
+        // 行動指針・育成の行には紐付け先が無い。0006 の CHECK と同じ条件。
+        department_goal_id:
+          goal.category === "quantitative" ? (goal.departmentGoalId ?? null) : null,
         expected_behavior:
           goal.category === "behavioral" ? EXPECTED_BEHAVIOR[grade][sortOrder - 1] : null,
         midterm_progress: null,
@@ -560,6 +580,100 @@ export function buildSeed(): LocalTables {
         ends_on: "2026-12-31",
         status: "open",
         created_at: NOW,
+      },
+    ],
+    // 工事第一課 は 工事本部 の下。この入れ子があるので、第一課の社員は
+    // 自部署の目標だけでなく本部の目標にも自分の目標を紐づけられる。
+    departments: [
+      {
+        id: ID.deptHonbu,
+        name: "工事本部",
+        parent_id: null,
+        head_id: ID.tanaka,
+        sort_order: 10,
+        created_at: NOW,
+      },
+      {
+        id: ID.deptIchika,
+        name: "工事第一課",
+        parent_id: ID.deptHonbu,
+        head_id: ID.sato,
+        sort_order: 20,
+        created_at: NOW,
+      },
+      {
+        id: ID.deptKikaku,
+        name: "経営企画室",
+        parent_id: null,
+        head_id: ID.admin,
+        sort_order: 30,
+        created_at: NOW,
+      },
+    ],
+    // 田中部長が定めた部門目標。個人の部門定量項目はこれに紐づく。
+    // 上期(締め済み)ぶんも入れてあるのは、既存の評価シートを開いた時点で
+    // 「この個人目標はこの部門目標のために立てた」という関係が見えるように。
+    department_goals: [
+      {
+        id: ID.goalH1Recruit,
+        department_id: ID.deptHonbu,
+        period_id: ID.periodH1,
+        sort_order: 10,
+        title: "採用広報を強化し、技術系新卒の応募数を前年比で増やす",
+        description: "現場の人手不足は採用の入口から始まっている。会社を知ってもらう手段を増やす。",
+        target_metric: "technical系新卒エントリー 前年比+30%",
+        created_by: ID.tanaka,
+        created_at: "2026-01-05T00:00:00.000Z",
+        updated_at: "2026-01-05T00:00:00.000Z",
+      },
+      {
+        id: ID.goalH1Training,
+        department_id: ID.deptHonbu,
+        period_id: ID.periodH1,
+        sort_order: 20,
+        title: "新入社員教育を仕組み化し、指導担当者による差をなくす",
+        description: "誰が教えるかで到達点が変わる状態をやめる。教える側の負担も同時に下げる。",
+        target_metric: "共通研修教材を整備／配属3か月時点の到達度チェックを実施",
+        created_by: ID.tanaka,
+        created_at: "2026-01-05T00:00:00.000Z",
+        updated_at: "2026-01-05T00:00:00.000Z",
+      },
+      {
+        id: ID.goalSafety,
+        department_id: ID.deptHonbu,
+        period_id: ID.periodH2,
+        sort_order: 10,
+        title: "重大災害ゼロを継続し、ヒヤリハット報告を定着させる",
+        description:
+          "指摘を待たずに現場から声が上がる状態をつくる。件数の多さは悪ではなく、報告が出てこないことが危険。",
+        target_metric: "重大災害0件／ヒヤリハット報告 月10件以上",
+        created_by: ID.tanaka,
+        created_at: NOW,
+        updated_at: NOW,
+      },
+      {
+        id: ID.goalCost,
+        department_id: ID.deptHonbu,
+        period_id: ID.periodH2,
+        sort_order: 20,
+        title: "現場別の原価管理を月次で回し、実行予算との乖離を早期に把握する",
+        description: "期末にまとめて判明するのを避ける。月次で差異を見て、その場で手を打てる状態にする。",
+        target_metric: "全現場で月次原価報告を提出／実行予算比 ±3%以内",
+        created_by: ID.tanaka,
+        created_at: NOW,
+        updated_at: NOW,
+      },
+      {
+        id: ID.goalHandover,
+        department_id: ID.deptIchika,
+        period_id: ID.periodH2,
+        sort_order: 10,
+        title: "施工ノウハウの標準化を進め、担当者が代わっても品質が落ちない状態にする",
+        description: "個人の勘に依存している手順を文書・動画に落とし、若手が独力で辿れるようにする。",
+        target_metric: "主要工種5件の手順書を整備／若手2名が独力で施工図を作成できる",
+        created_by: ID.sato,
+        created_at: NOW,
+        updated_at: NOW,
       },
     ],
     // 山の日など、全社が休みの日。これが入っていると日報の分母から外れる。

@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/admin/members", label: "社員マスタ" },
+  { href: "/admin/departments", label: "部署マスタ" },
   { href: "/admin/periods", label: "評価期間" },
+  { href: "/admin/holidays", label: "会社休日" },
 ];
 
 export function AdminTabs() {

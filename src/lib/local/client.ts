@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { commit, loadTables } from "./store.ts";
-import { blockedColumn, canSelect, canWrite, type Viewer } from "./policy.ts";
+import { blockedColumn, canSelect, canWrite, violatedCheck, type Viewer } from "./policy.ts";
 import {
   COLUMN_DEFAULTS,
   PRIMARY_KEY,
@@ -277,12 +277,34 @@ class Query implements PromiseLike<Result<Row[] | Row | null>> {
 
         if (existing) {
           if (!canWrite(this.table, existing, tables, this.viewer)) continue;
+          const failedUpsert = violatedCheck(this.table, { ...existing, ...raw });
+          if (failedUpsert) {
+            return {
+              data: null,
+              error: {
+                message: `new row for relation "${this.table}" violates check constraint "${failedUpsert}"`,
+                code: "23514",
+              },
+              count: null,
+            };
+          }
           Object.assign(existing, raw, { updated_at: new Date().toISOString() });
           affected.push(existing);
           continue;
         }
 
         const row = applyInsertDefaults(this.table, raw);
+        const failed = violatedCheck(this.table, row);
+        if (failed) {
+          return {
+            data: null,
+            error: {
+              message: `new row for relation "${this.table}" violates check constraint "${failed}"`,
+              code: "23514",
+            },
+            count: null,
+          };
+        }
         if (!canWrite(this.table, row, tables, this.viewer)) {
           return {
             data: null,
@@ -307,6 +329,17 @@ class Query implements PromiseLike<Result<Row[] | Row | null>> {
       if (mutation.kind === "update") {
         for (const row of targets) {
           const candidate = { ...row, ...mutation.patch };
+          const failed = violatedCheck(this.table, candidate);
+          if (failed) {
+            return {
+              data: null,
+              error: {
+                message: `new row for relation "${this.table}" violates check constraint "${failed}"`,
+                code: "23514",
+              },
+              count: null,
+            };
+          }
           const blocked = blockedColumn(this.table, row, candidate, tables, this.viewer);
           if (blocked) {
             return {

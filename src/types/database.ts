@@ -11,9 +11,43 @@ export type Profile = {
   role: UserRole;
   /** Added in 0003. Decides the term-evaluation category weights. */
   job_grade: JobGrade;
+  /** Legacy free-text name. Kept in sync with department_id; drops next term. */
   department: string | null;
+  /** Added in 0006. The department master row this person belongs to. */
+  department_id: string | null;
   manager_id: string | null;
   created_at: string;
+};
+
+// --- Departments, see supabase/migrations/0006_department_goals.sql ---
+
+/**
+ * 部署マスタ。`parent_id` で入れ子になるのは、工事第一課 が 工事本部 の下に
+ * あるような構造を持つ必要があるから -- 課の社員は本部の目標も選べる。
+ */
+export type Department = {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  /** その部署の長。部門目標を書けるのはこの人（と管理者）だけ。 */
+  head_id: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
+/** 部長が期ごとに定める部門目標。個人の部門定量項目の紐付け先。 */
+export type DepartmentGoal = {
+  id: string;
+  department_id: string;
+  period_id: string;
+  sort_order: number;
+  title: string;
+  description: string;
+  /** 「事故0件」「原価率◯%」など、何をもって達成とするか。 */
+  target_metric: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type DailyReport = {
@@ -155,6 +189,12 @@ export type TermEvaluationItem = {
   category: EvaluationCategory;
   sort_order: number;
   title: string;
+  /**
+   * Added in 0006. Which 部門目標 this personal goal serves.
+   * Null for behavioral/development rows (a CHECK enforces that), and null on
+   * quantitative rows in a term where no department goals were set.
+   */
+  department_goal_id: string | null;
   expected_behavior: string | null;
   midterm_progress: string | null;
   midterm_self_score: number | null;
@@ -215,6 +255,18 @@ export type Database = {
         Row: EvaluationPeriod;
         Insert: Partial<EvaluationPeriod>;
         Update: Partial<EvaluationPeriod>;
+        Relationships: [];
+      };
+      departments: {
+        Row: Department;
+        Insert: Partial<Department>;
+        Update: Partial<Department>;
+        Relationships: [];
+      };
+      department_goals: {
+        Row: DepartmentGoal;
+        Insert: Partial<DepartmentGoal>;
+        Update: Partial<DepartmentGoal>;
         Relationships: [];
       };
       company_holidays: {
