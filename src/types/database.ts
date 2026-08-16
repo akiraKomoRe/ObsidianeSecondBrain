@@ -66,7 +66,31 @@ export type WeeklyAiEvaluation = {
   criteria_scores: CriterionScore[];
   overall_summary: string | null;
   model_version: string | null;
+  /** Added in 0005. Which version of the prompt/rules produced these scores. */
+  prompt_version: string | null;
   generated_at: string;
+};
+
+// --- Attendance, see supabase/migrations/0005_prompt_version_and_attendance.sql ---
+
+/** 全社共通の休業日（祝日・年末年始・創立記念日など）。 */
+export type CompanyHoliday = {
+  holiday_on: string; // YYYY-MM-DD
+  label: string;
+  created_at: string;
+};
+
+/**
+ * 個人の休暇。行が存在する日は稼働日から外れる（＝日報の提出対象外）。
+ * `kind` は表示のためだけで、稼働日判定は種別を見ない。
+ */
+export type PersonalLeave = {
+  user_id: string;
+  leave_on: string; // YYYY-MM-DD
+  kind: string;
+  /** 'manual' か、同期元の名前（ジョブカン連携後は 'jobcan'）。 */
+  source: string;
+  created_at: string;
 };
 
 // --- Term (半期) evaluation, see supabase/migrations/0003_term_evaluation.sql ---
@@ -191,6 +215,18 @@ export type Database = {
         Row: EvaluationPeriod;
         Insert: Partial<EvaluationPeriod>;
         Update: Partial<EvaluationPeriod>;
+        Relationships: [];
+      };
+      company_holidays: {
+        Row: CompanyHoliday;
+        Insert: Partial<CompanyHoliday>;
+        Update: Partial<CompanyHoliday>;
+        Relationships: [];
+      };
+      personal_leaves: {
+        Row: PersonalLeave;
+        Insert: Partial<PersonalLeave>;
+        Update: Partial<PersonalLeave>;
         Relationships: [];
       };
       job_grade_weights: {

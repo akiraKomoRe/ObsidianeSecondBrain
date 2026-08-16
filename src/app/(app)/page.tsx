@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CalendarOff, CheckCircle2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, getWeekRange } from "@/lib/date/week";
-import { clampToToday, countWeekdays } from "@/lib/date/business-days";
+import { clampToToday } from "@/lib/date/business-days";
+import { countWorkingDays, getDayOff } from "@/lib/attendance/working-days";
 import { Button } from "@/components/ui/button";
 import {
   EvaluationStatCard,
@@ -26,7 +27,10 @@ export default async function HomePage() {
   const today = new Date();
   const todayStr = formatDate(today);
   const { weekStart, weekEnd } = getWeekRange(today);
-  const weekdayTarget = countWeekdays(weekStart, clampToToday(weekEnd, today));
+  // 休日・有給を除いた「今日までに出しているべき件数」。カレンダー上の平日では
+  // ないので、有給を取った日が未提出として残らない。
+  const weekdayTarget = await countWorkingDays(user!.id, weekStart, clampToToday(weekEnd, today));
+  const dayOff = await getDayOff(user!.id, todayStr);
 
   const [
     { data: weekDailyReports },
@@ -105,6 +109,14 @@ export default async function HomePage() {
           <p className="flex items-center gap-1.5 text-sm font-medium text-app-success">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             本日の日報は提出済みです
+          </p>
+        ) : dayOff ? (
+          // 休みの日に「未入力です・入力する」と急かさない。日報画面が
+          // 「提出は不要です」と言っているのに、ホームでは催促されている、
+          // という食い違いが起きる。
+          <p className="flex items-center gap-1.5 text-sm text-app-text-muted">
+            <CalendarOff className="h-4 w-4 shrink-0" />
+            本日は{dayOff.label}です（日報の提出は不要）
           </p>
         ) : (
           <div className="flex items-center gap-3">

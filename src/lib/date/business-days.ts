@@ -1,23 +1,15 @@
 import { formatDate, parseDate } from "./week";
 
-// Counts Mon-Fri dates between weekStart and end (inclusive), used as the
-// "expected number of daily reports so far this week" denominator on the
-// dashboard. end is typically today, clamped to the week's Sunday.
-export function countWeekdays(weekStartValue: string, endValue: string): number {
-  const start = parseDate(weekStartValue);
-  const end = parseDate(endValue);
-  if (end < start) return 0;
+// Counting which days a report is owed for now lives in
+// `src/lib/attendance/working-days.ts`, because the answer depends on company
+// holidays and the person's own leave -- not just on Mon-Fri. What is left
+// here is the piece of that question which is purely about dates.
 
-  let count = 0;
-  const cursor = new Date(start);
-  while (cursor <= end) {
-    const day = cursor.getDay();
-    if (day !== 0 && day !== 6) count++;
-    cursor.setDate(cursor.getDate() + 1);
-  }
-  return count;
-}
-
+/**
+ * Caps the week's end at today, so a Wednesday shows "n / 3" rather than
+ * "n / 5" and the two days that have not happened yet are not counted as
+ * missing.
+ */
 export function clampToToday(weekEndValue: string, today: Date): string {
   const weekEnd = parseDate(weekEndValue);
   return weekEnd < today ? weekEndValue : formatDate(today);

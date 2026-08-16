@@ -40,12 +40,13 @@ function daily(date: string, content: string): DailyReport {
   };
 }
 
-const run = (reports: DailyReport[]) =>
+const run = (reports: DailyReport[], expectedDays = 5) =>
   generateLocalEvaluation({
     employeeName: "山田 太郎",
     dailyReports: reports,
     weeklyReport: null,
     criteria,
+    expectedDays,
   });
 
 const scoreOf = (result: ReturnType<typeof run>, key: string) =>
@@ -87,6 +88,29 @@ describe("ローカル週次評価", () => {
   test("総評にAI未接続であることが必ず入る", () => {
     const result = run([daily("2026-08-03", "安全確認を実施。")]);
     assert.match(result.overallSummary, /AI未接続/);
+  });
+
+  /**
+   * 稼働日数は呼び出し側から渡される。ここが5日固定に戻ると、有給を取った週が
+   * 「記録が途切れている」と書かれてしまう —— 休んだ人を怠慢と評価する、
+   * この機能で一番やってはいけない間違い。
+   */
+  test("有給で稼働4日の週に日報4件なら「そろっています」", () => {
+    const reports = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06"].map((d) =>
+      daily(d, "安全確認を実施。")
+    );
+    const result = run(reports, 4);
+    assert.match(result.overallSummary, /そろっています/);
+    assert.doesNotMatch(result.overallSummary, /途切れ/);
+  });
+
+  test("稼働5日で日報4件なら不足として扱う", () => {
+    const reports = ["2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06"].map((d) =>
+      daily(d, "安全確認を実施。")
+    );
+    const result = run(reports, 5);
+    assert.match(result.overallSummary, /4\/5件/);
+    assert.match(result.overallSummary, /途切れ/);
   });
 
   test("コメントは点の根拠になった語を挙げる", () => {

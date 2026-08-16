@@ -1,9 +1,11 @@
 import type {
   BehaviorGuideline,
+  CompanyHoliday,
   DailyReport,
   EvaluationCriterion,
   EvaluationPeriod,
   JobGradeWeights,
+  PersonalLeave,
   Profile,
   TermEvaluation,
   TermEvaluationItem,
@@ -25,6 +27,8 @@ export type LocalTables = {
   evaluation_criteria: EvaluationCriterion[];
   weekly_ai_evaluations: WeeklyAiEvaluation[];
   evaluation_periods: EvaluationPeriod[];
+  company_holidays: CompanyHoliday[];
+  personal_leaves: PersonalLeave[];
   job_grade_weights: JobGradeWeights[];
   behavior_guidelines: BehaviorGuideline[];
   term_evaluations: TermEvaluation[];
@@ -49,6 +53,11 @@ export const PRIMARY_KEY: Record<TableName, string> = {
   evaluation_criteria: "id",
   weekly_ai_evaluations: "id",
   evaluation_periods: "id",
+  // 会社休日は日付そのものが主キー（1日1行）。個人の休暇は user_id と対で
+  // 一意なので、複合キーを表現できないこの表では leave_on を主キーとし、
+  // 重複は UNIQUE_KEYS 側で弾く。
+  company_holidays: "holiday_on",
+  personal_leaves: "leave_on",
   job_grade_weights: "job_grade",
   behavior_guidelines: "id",
   term_evaluations: "id",
@@ -71,8 +80,10 @@ export const COLUMN_DEFAULTS: Partial<Record<TableName, Row>> = {
   daily_reports: { work_hours: null, issues: null, tomorrow_plan: null },
   weekly_reports: { self_reflection: null, submitted_at: null },
   evaluation_criteria: { description: null, category: null, weight: 1, is_active: true },
-  weekly_ai_evaluations: { overall_summary: null, model_version: null },
+  weekly_ai_evaluations: { overall_summary: null, model_version: null, prompt_version: null },
   evaluation_periods: { status: "open" },
+  company_holidays: { label: "" },
+  personal_leaves: { kind: "paid_leave", source: "manual" },
   behavior_guidelines: {},
   term_evaluations: {
     stage: "goal_setting",
@@ -108,6 +119,8 @@ export const UNIQUE_KEYS: Partial<Record<TableName, string[][]>> = {
   evaluation_criteria: [["key"]],
   weekly_ai_evaluations: [["user_id", "week_start"]],
   evaluation_periods: [["year", "half"]],
+  company_holidays: [["holiday_on"]],
+  personal_leaves: [["user_id", "leave_on"]],
   behavior_guidelines: [["sort_order", "job_grade"]],
   term_evaluations: [["user_id", "period_id"]],
 };

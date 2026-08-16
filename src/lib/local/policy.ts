@@ -81,6 +81,18 @@ const RULES: Record<TableName, Rules> = {
   behavior_guidelines: READ_ONLY_MASTER,
   evaluation_periods: { select: () => true, write: (_row, ctx) => isAdmin(ctx) },
 
+  // 会社休日は秘密ではない -- 今日日報を出す義務があるかを全員が知る必要がある。
+  // 編集は総務（admin）だけ。
+  company_holidays: { select: () => true, write: (_row, ctx) => isAdmin(ctx) },
+
+  // 休暇は個人情報。誰がいつ何で休んだかは同僚どうしで横に見えてはいけないので、
+  // 評価本体と同じ三者（本人・上長・管理者）だけが読める。
+  personal_leaves: {
+    select: (row, ctx) =>
+      row.user_id === ctx.viewerId || isOversightOf(ctx, String(row.user_id)),
+    write: (_row, ctx) => isAdmin(ctx),
+  },
+
   term_evaluations: {
     select: (row, ctx) =>
       row.user_id === ctx.viewerId || isOversightOf(ctx, String(row.user_id)),

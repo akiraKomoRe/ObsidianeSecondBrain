@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getTeamMember } from "@/lib/team/get-team-member";
 import { getWeekRange } from "@/lib/date/week";
-import { clampToToday, countWeekdays } from "@/lib/date/business-days";
+import { clampToToday } from "@/lib/date/business-days";
+import { countWorkingDays } from "@/lib/attendance/working-days";
 import { EvaluationStatCard, ProgressStatCard, StatusStatCard } from "@/app/(app)/dashboard-cards";
 
 export default async function TeamMemberOverviewPage({
@@ -15,7 +16,9 @@ export default async function TeamMemberOverviewPage({
 
   const today = new Date();
   const { weekStart, weekEnd } = getWeekRange(today);
-  const weekdayTarget = countWeekdays(weekStart, clampToToday(weekEnd, today));
+  // 休日・有給を除いた「今日までに提出されているべき件数」。祝日や有給の日は
+  // 分母に入らないので、休んだ部下が未提出扱いにならない。
+  const weekdayTarget = await countWorkingDays(member.id, weekStart, clampToToday(weekEnd, today));
 
   const [{ data: weekDailyReports }, { data: weeklyReport }, { data: recentEvaluations }] = await Promise.all([
     supabase

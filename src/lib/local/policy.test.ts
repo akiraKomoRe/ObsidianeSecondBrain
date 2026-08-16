@@ -340,6 +340,44 @@ describe("承認フロー中の書き込み可否（監査で見つかった不�
   });
 });
 
+describe("休暇情報の可視範囲", () => {
+  /**
+   * 誰がいつ何で休んだかは人事情報で、同僚どうしで横に見えてはいけない。
+   * 稼働日を数えるためだけに置いたテーブルが、休職や通院の推測材料になっては
+   * 本末転倒なので、評価本体と同じ三者（本人・上長・管理者）に閉じる。
+   */
+  const leavesFor = async (viewerId: string) =>
+    rows(await as(viewerId).from("personal_leaves").select("*").eq("user_id", YAMADA));
+
+  test("本人は自分の休暇が見える", async () => {
+    assert.ok((await leavesFor(YAMADA)).length > 0);
+  });
+
+  test("上長・二次承認者・管理者は部下の休暇が見える", async () => {
+    for (const viewer of [SATO, TANAKA, ADMIN]) {
+      assert.ok((await leavesFor(viewer)).length > 0, `${viewer} が見られない`);
+    }
+  });
+
+  test("同僚どうしは互いの休暇が見えない", async () => {
+    assert.equal((await leavesFor(SUZUKI)).length, 0);
+  });
+
+  test("会社休日は全員が見える（今日提出義務があるか誰でも判断できる必要がある）", async () => {
+    for (const viewer of [YAMADA, SUZUKI, SATO, ADMIN]) {
+      const holidays = rows(await as(viewer).from("company_holidays").select("*"));
+      assert.ok(holidays.length > 0, `${viewer} が会社休日を見られない`);
+    }
+  });
+
+  test("一般社員は会社休日を書き換えられない", async () => {
+    const { error } = await as(YAMADA)
+      .from("company_holidays")
+      .insert({ holiday_on: "2026-12-31", label: "勝手に休む" });
+    assert.ok(error, "一般社員の書き込みが通ってしまった");
+  });
+});
+
 describe("シードの健全性", () => {
   test("行動指針は 5指針 × 6役職 = 30件", () => {
     assert.equal(buildSeed().behavior_guidelines.length, 30);

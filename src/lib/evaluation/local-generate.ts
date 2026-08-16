@@ -15,6 +15,13 @@ import type { CriterionScore, DailyReport, EvaluationCriterion, WeeklyReport } f
 
 export const LOCAL_MODEL_VERSION = "local-rule-based";
 
+/**
+ * 判定ルール（SIGNALS の語彙と scoreFor の閾値）を変えたら上げること。
+ * AI版の `WEEKLY_PROMPT_VERSION` と同じ役割で、後から「この点はどの版の
+ * ルールで出たのか」を特定するために行に刻む。
+ */
+export const LOCAL_PROMPT_VERSION = "local-rule-v1";
+
 /** Words that indicate a criterion was actually engaged with that week. */
 const SIGNALS: Record<string, string[]> = {
   safety: ["安全", "KY", "ヒヤリ", "危険", "養生", "パトロール", "保護具", "是正"],

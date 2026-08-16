@@ -52,9 +52,19 @@ export function EvaluationDetailView({
             </Badge>
           )}
         </div>
+        {/*
+          モデルと判定基準の版を両方出す。人事評価規程 第12条で本人がこの評価に
+          不服を申し立てたとき、審査するのは「どういう基準で出た点なのか」で、
+          モデル名だけではそれが特定できない（同じモデルでも基準を書き換えれば
+          点は変わる）。この2つが揃っていれば当時の基準まで遡れる。
+        */}
         <p className="mt-1 text-xs text-app-text-faint">
           生成日時: {new Date(evaluation.generated_at).toLocaleString("ja-JP")}
-          {evaluation.model_version ? `（モデル: ${evaluation.model_version}）` : ""}
+          {evaluation.model_version
+            ? `（${isLocal ? "判定" : "モデル"}: ${evaluation.model_version}${
+                evaluation.prompt_version ? ` / 基準: ${evaluation.prompt_version}` : ""
+              }）`
+            : ""}
         </p>
         {isLocal ? (
           <p className="mt-2 rounded-lg border border-app-border bg-app-card p-3 text-xs leading-relaxed text-app-text-muted">

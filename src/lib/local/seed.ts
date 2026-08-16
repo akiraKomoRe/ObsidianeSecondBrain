@@ -562,6 +562,18 @@ export function buildSeed(): LocalTables {
         created_at: NOW,
       },
     ],
+    // 山の日など、全社が休みの日。これが入っていると日報の分母から外れる。
+    company_holidays: [
+      { holiday_on: "2026-08-11", label: "山の日", created_at: NOW },
+      { holiday_on: "2026-09-21", label: "敬老の日", created_at: NOW },
+      { holiday_on: "2026-09-22", label: "秋分の日", created_at: NOW },
+    ],
+    // 山田の有給。8/7(金) は日報が無いが、休んだ日なので未提出には数えない
+    // ——「今週の日報 4/5件」ではなく「4/4件」と出るのが正しい姿。
+    personal_leaves: [
+      { user_id: ID.yamada, leave_on: "2026-08-07", kind: "paid_leave", source: "manual", created_at: NOW },
+      { user_id: ID.yamada, leave_on: "2026-08-13", kind: "paid_leave", source: "manual", created_at: NOW },
+    ],
     job_grade_weights: WEIGHTS,
     behavior_guidelines: behaviorGuidelines(),
     term_evaluations,
