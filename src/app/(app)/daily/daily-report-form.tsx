@@ -40,7 +40,7 @@ export function DailyReportForm({
   return (
     <Card className="p-0">
       <form ref={formRef} action={formAction} className="space-y-5 p-5 sm:p-6">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="report_date">日付</Label>
             <Input

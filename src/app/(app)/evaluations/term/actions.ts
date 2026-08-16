@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/current-user";
 import { isDenied, requireOwnDraft } from "@/lib/evaluation/authz";
 import { selectableDepartmentGoals } from "@/lib/evaluation/department-goals";
-import type { EvaluationCategory, TermEvaluationItem } from "@/types/database";
+import { buildItemPatch } from "@/lib/evaluation/term-form";
+import type { EvaluationCategory } from "@/types/database";
 
 export type TermFormState = { error: string | null; success: boolean };
 
@@ -156,35 +157,6 @@ export async function deleteTermItem(_prev: TermFormState, formData: FormData): 
 }
 
 /**
- * 部門目標の紐付け。
- *
- * フォームにその項目のselectが無ければ（＝部門定量項目ではない、あるいは
- * 選べる部門目標が1つも無い）キーごと返さない。`undefined` を混ぜると
- * 既存の紐付けを黙って消してしまうので、「送られてこなかった」と
- * 「未選択にされた」を分けて扱う。
- */
-function departmentGoalPatch(
-  formData: FormData,
-  itemId: string,
-  selectable: Set<string> | null
-): Pick<TermEvaluationItem, "department_goal_id"> | Record<string, never> {
-  const key = `department_goal_${itemId}`;
-  if (!formData.has(key)) return {};
-  const raw = String(formData.get(key) ?? "").trim();
-  // 選べないはずの目標を指してきたら「未選択」に倒す。保存自体を失敗させると
-  // 他の項目に書いた内容まで巻き添えで失われる。
-  if (raw && selectable && !selectable.has(raw)) return { department_goal_id: null };
-  return { department_goal_id: raw || null };
-}
-
-function parseScore(raw: FormDataEntryValue | null): number | null {
-  const value = String(raw ?? "").trim();
-  if (!value) return null;
-  const score = Number(value);
-  return Number.isInteger(score) && score >= 1 && score <= 5 ? score : null;
-}
-
-/**
  * Save the employee's side of the sheet. Which fields are written depends on
  * the stage, so that filling in the final self-assessment cannot silently wipe
  * the mid-period record that the manager may already have read.
@@ -215,25 +187,26 @@ export async function saveOwnTermEvaluation(
     selectableGoalIds = new Set(goals.map((goal) => goal.id));
   }
 
+  // 行ごとのカテゴリを先に引く。部門目標がぶら下がってよいのは部門定量項目だけで、
+  // その判定にカテゴリが要る。
+  const { data: existingItems } = await supabase
+    .from("term_evaluation_items")
+    .select("id, category")
+    .eq("term_evaluation_id", evaluationId);
+  const categoryById = new Map((existingItems ?? []).map((item) => [item.id, item.category]));
+
   for (const itemId of itemIds) {
-    const patch: Partial<TermEvaluationItem> =
-      stage === "goal_setting"
-        ? {
-            title: String(formData.get(`title_${itemId}`) ?? "").trim(),
-            // 部門目標との紐付けは期首にだけ書き換わる。中間・期末で
-            // 紐付け先が動くと、何に向けて立てた目標だったのかが後から
-            // 変わってしまう。
-            ...departmentGoalPatch(formData, itemId, selectableGoalIds),
-          }
-        : stage === "midterm"
-          ? {
-              midterm_progress: String(formData.get(`midterm_progress_${itemId}`) ?? "").trim(),
-              midterm_self_score: parseScore(formData.get(`midterm_self_score_${itemId}`)),
-            }
-          : {
-              self_comment: String(formData.get(`self_comment_${itemId}`) ?? "").trim(),
-              self_score: parseScore(formData.get(`self_score_${itemId}`)),
-            };
+    const patch = buildItemPatch({
+      formData,
+      itemId,
+      stage,
+      category: categoryById.get(itemId) ?? null,
+      selectableGoalIds,
+    });
+
+    // 書くものが何も無い行は飛ばす。空のpatchでUPDATEすると0行になり、
+    // 下の0行チェックが「保存に失敗しました」と誤検知する。
+    if (Object.keys(patch).length === 0) continue;
 
     // .select() turns "the policy silently matched nothing" into a visible
     // failure. Without it a rejected write reports success and the employee

@@ -42,7 +42,7 @@ export function DepartmentForm({
         ) : null}
       </div>
 
-      <form action={formAction} className="grid gap-3 sm:grid-cols-3">
+      <form action={formAction} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {department ? <input type="hidden" name="id" value={department.id} /> : null}
 
         <div className="space-y-1.5">

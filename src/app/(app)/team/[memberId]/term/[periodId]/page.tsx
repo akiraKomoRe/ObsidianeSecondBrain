@@ -46,7 +46,7 @@ export default async function TeamMemberTermDetailPage({
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <TermScoreSummary score={scoreView(view, "self")} label="本人の自己評価" />
         <TermScoreSummary score={scoreView(view, "manager")} label="上長評価" tone="final" />
       </div>

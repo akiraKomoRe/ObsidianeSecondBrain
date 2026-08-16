@@ -56,7 +56,7 @@ export function MemberForm({
         </p>
       </div>
 
-      <form action={formAction} className="grid gap-3 sm:grid-cols-2">
+      <form action={formAction} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <input type="hidden" name="id" value={profile.id} />
 
         <div className="space-y-1.5">

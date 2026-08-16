@@ -130,7 +130,7 @@ export default async function HomePage() {
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <ProgressStatCard
           label="今週の日報"
           value={weekDailyReports?.length ?? 0}
@@ -141,7 +141,10 @@ export default async function HomePage() {
         <EvaluationStatCard avgScore={latestAvg} trend={trend} href="/evaluations" />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      {/* grid-cols-1 は飾りではない。省くと暗黙のトラックが max-content で伸び、
+          スマホ幅で「直近の日報」のカードが画面をはみ出して横スクロールになる。
+          任意幅の指定側も minmax(0,…) で包む（fr の既定の最小値は min-content）。 */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <RecentReports reports={latestReports ?? []} />
         <ScoreTrend items={trendItems} />
       </div>
