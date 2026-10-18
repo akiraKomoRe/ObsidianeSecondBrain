@@ -1,0 +1,1082 @@
+{
+  "profiles": [
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "email": "tanaka@showa-kensetsu.example.com",
+      "name": "田中 部長",
+      "role": "manager",
+      "job_grade": "bucho",
+      "department": "工事本部",
+      "department_id": "dddddddd-0000-4000-8000-000000000001",
+      "manager_id": null,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "email": "sato@showa-kensetsu.example.com",
+      "name": "佐藤 次郎",
+      "role": "manager",
+      "job_grade": "kacho",
+      "department": "工事第一課",
+      "department_id": "dddddddd-0000-4000-8000-000000000002",
+      "manager_id": "44444444-4444-4444-8444-444444444444",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "email": "yamada@showa-kensetsu.example.com",
+      "name": "山田 太郎",
+      "role": "employee",
+      "job_grade": "ippan",
+      "department": "工事第一課",
+      "department_id": "dddddddd-0000-4000-8000-000000000002",
+      "manager_id": "33333333-3333-4333-8333-333333333333",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "email": "suzuki@showa-kensetsu.example.com",
+      "name": "鈴木 花子",
+      "role": "employee",
+      "job_grade": "shunin",
+      "department": "工事第一課",
+      "department_id": "dddddddd-0000-4000-8000-000000000002",
+      "manager_id": "33333333-3333-4333-8333-333333333333",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "55555555-5555-4555-8555-555555555555",
+      "email": "admin@showa-kensetsu.example.com",
+      "name": "管理者",
+      "role": "admin",
+      "job_grade": "ippan",
+      "department": "経営企画室",
+      "department_id": "dddddddd-0000-4000-8000-000000000003",
+      "manager_id": null,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "daily_reports": [
+    {
+      "id": "daily-2026-08-03",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-08-03",
+      "work_content": "現場A基礎工事の配筋検査に立ち会い、施工図との照合を実施。",
+      "work_hours": 8,
+      "issues": "図面の寸法表記に不明点があり、設計へ確認を依頼した。",
+      "tomorrow_plan": "型枠の建て込み準備と資材数量の確認。",
+      "created_at": "2026-08-03T09:00:00.000Z",
+      "updated_at": "2026-08-03T09:00:00.000Z"
+    },
+    {
+      "id": "daily-2026-08-04",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-08-04",
+      "work_content": "型枠設置の段取りを協力会社と打ち合わせ。安全ミーティングを実施。",
+      "work_hours": 8.5,
+      "issues": "特になし。",
+      "tomorrow_plan": "型枠設置の着手。",
+      "created_at": "2026-08-04T09:00:00.000Z",
+      "updated_at": "2026-08-04T09:00:00.000Z"
+    },
+    {
+      "id": "daily-2026-08-05",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-08-05",
+      "work_content": "安全パトロールと週次の資材棚卸しを実施。ヒヤリハット1件を記録・共有。",
+      "work_hours": 8,
+      "issues": "開口部の養生が不十分な箇所を発見し、その場で是正した。",
+      "tomorrow_plan": "是正箇所の再確認と、型枠精度のチェック。",
+      "created_at": "2026-08-05T09:00:00.000Z",
+      "updated_at": "2026-08-05T09:00:00.000Z"
+    },
+    {
+      "id": "daily-2026-08-06",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-08-06",
+      "work_content": "現場A基礎工事の型枠設置。資材搬入の立ち会いを実施。",
+      "work_hours": 8,
+      "issues": "資材搬入が30分遅延。翌日の搬入スケジュールを確認する必要あり。",
+      "tomorrow_plan": "型枠の最終確認とコンクリート打設準備。",
+      "created_at": "2026-08-06T09:00:00.000Z",
+      "updated_at": "2026-08-06T09:00:00.000Z"
+    },
+    {
+      "id": "daily-2026-07-27",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-07-27",
+      "work_content": "施工図の修正対応と、協力会社への工程共有。",
+      "work_hours": 7.5,
+      "issues": "工程表の更新が遅れ、共有が翌日になった。",
+      "tomorrow_plan": "工程表を更新して朝礼で共有する。",
+      "created_at": "2026-07-27T09:00:00.000Z",
+      "updated_at": "2026-07-27T09:00:00.000Z"
+    },
+    {
+      "id": "daily-2026-07-29",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "report_date": "2026-07-29",
+      "work_content": "資材の発注数量を精査し、余剰在庫を他現場へ融通する調整を実施。",
+      "work_hours": 8,
+      "issues": "特になし。",
+      "tomorrow_plan": "発注書の作成。",
+      "created_at": "2026-07-29T09:00:00.000Z",
+      "updated_at": "2026-07-29T09:00:00.000Z"
+    }
+  ],
+  "weekly_reports": [
+    {
+      "id": "weekly-2026-07-27",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "week_start": "2026-07-27",
+      "week_end": "2026-08-02",
+      "self_reflection": "工程表の更新が後手に回った週でした。翌週は朝礼前に更新を済ませる運用に変えます。資材の余剰を他現場へ回す調整はうまく進みました。",
+      "submitted_at": "2026-08-02T10:00:00.000Z",
+      "created_at": "2026-07-27T09:00:00.000Z",
+      "updated_at": "2026-08-02T10:00:00.000Z"
+    }
+  ],
+  "evaluation_criteria": [
+    {
+      "id": "criterion-safety",
+      "key": "safety",
+      "label": "安全管理",
+      "description": "現場での安全確認・KY活動・ヒヤリハット報告など、安全に関する意識と行動",
+      "category": "施工",
+      "weight": 1.2,
+      "sort_order": 10,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-quality",
+      "key": "quality",
+      "label": "品質管理",
+      "description": "図面・仕様への準拠、施工品質、手戻りの少なさ",
+      "category": "施工",
+      "weight": 1.2,
+      "sort_order": 20,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-schedule",
+      "key": "schedule",
+      "label": "工程管理",
+      "description": "工程遅延の有無、進捗報告の的確さ、段取りの良さ",
+      "category": "施工",
+      "weight": 1,
+      "sort_order": 30,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-cost_awareness",
+      "key": "cost_awareness",
+      "label": "コスト意識",
+      "description": "資材・人員配置・手待ちなど、コストを意識した動きができているか",
+      "category": "施工",
+      "weight": 0.8,
+      "sort_order": 40,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-teamwork",
+      "key": "teamwork",
+      "label": "チームワーク・協調性",
+      "description": "協力会社・他職種との連携、報連相の質",
+      "category": "対人",
+      "weight": 1,
+      "sort_order": 50,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-initiative",
+      "key": "initiative",
+      "label": "主体性・改善提案",
+      "description": "指示待ちでなく課題を見つけて動けているか、改善提案の有無",
+      "category": "対人",
+      "weight": 1,
+      "sort_order": 60,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "criterion-growth",
+      "key": "growth",
+      "label": "成長・自己研鑽",
+      "description": "新しい技術や資格取得への取り組み、振り返りの質",
+      "category": "成長",
+      "weight": 0.8,
+      "sort_order": 70,
+      "is_active": true,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "weekly_ai_evaluations": [],
+  "evaluation_periods": [
+    {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "year": 2026,
+      "half": "H1",
+      "starts_on": "2026-01-01",
+      "ends_on": "2026-06-30",
+      "status": "closed",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "year": 2026,
+      "half": "H2",
+      "starts_on": "2026-07-01",
+      "ends_on": "2026-12-31",
+      "status": "open",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "departments": [
+    {
+      "id": "dddddddd-0000-4000-8000-000000000001",
+      "name": "工事本部",
+      "parent_id": null,
+      "head_id": "44444444-4444-4444-8444-444444444444",
+      "sort_order": 10,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "dddddddd-0000-4000-8000-000000000002",
+      "name": "工事第一課",
+      "parent_id": "dddddddd-0000-4000-8000-000000000001",
+      "head_id": "33333333-3333-4333-8333-333333333333",
+      "sort_order": 20,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "dddddddd-0000-4000-8000-000000000003",
+      "name": "経営企画室",
+      "parent_id": null,
+      "head_id": "55555555-5555-4555-8555-555555555555",
+      "sort_order": 30,
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "department_goals": [
+    {
+      "id": "eeeeeeee-0000-4000-8000-000000000011",
+      "department_id": "dddddddd-0000-4000-8000-000000000001",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "sort_order": 10,
+      "title": "採用広報を強化し、技術系新卒の応募数を前年比で増やす",
+      "description": "現場の人手不足は採用の入口から始まっている。会社を知ってもらう手段を増やす。",
+      "target_metric": "technical系新卒エントリー 前年比+30%",
+      "created_by": "44444444-4444-4444-8444-444444444444",
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-01-05T00:00:00.000Z"
+    },
+    {
+      "id": "eeeeeeee-0000-4000-8000-000000000012",
+      "department_id": "dddddddd-0000-4000-8000-000000000001",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "sort_order": 20,
+      "title": "新入社員教育を仕組み化し、指導担当者による差をなくす",
+      "description": "誰が教えるかで到達点が変わる状態をやめる。教える側の負担も同時に下げる。",
+      "target_metric": "共通研修教材を整備／配属3か月時点の到達度チェックを実施",
+      "created_by": "44444444-4444-4444-8444-444444444444",
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-01-05T00:00:00.000Z"
+    },
+    {
+      "id": "eeeeeeee-0000-4000-8000-000000000001",
+      "department_id": "dddddddd-0000-4000-8000-000000000001",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "sort_order": 10,
+      "title": "重大災害ゼロを継続し、ヒヤリハット報告を定着させる",
+      "description": "指摘を待たずに現場から声が上がる状態をつくる。件数の多さは悪ではなく、報告が出てこないことが危険。",
+      "target_metric": "重大災害0件／ヒヤリハット報告 月10件以上",
+      "created_by": "44444444-4444-4444-8444-444444444444",
+      "created_at": "2026-08-09T09:00:00.000Z",
+      "updated_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "eeeeeeee-0000-4000-8000-000000000002",
+      "department_id": "dddddddd-0000-4000-8000-000000000001",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "sort_order": 20,
+      "title": "現場別の原価管理を月次で回し、実行予算との乖離を早期に把握する",
+      "description": "期末にまとめて判明するのを避ける。月次で差異を見て、その場で手を打てる状態にする。",
+      "target_metric": "全現場で月次原価報告を提出／実行予算比 ±3%以内",
+      "created_by": "44444444-4444-4444-8444-444444444444",
+      "created_at": "2026-08-09T09:00:00.000Z",
+      "updated_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "id": "eeeeeeee-0000-4000-8000-000000000003",
+      "department_id": "dddddddd-0000-4000-8000-000000000002",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "sort_order": 10,
+      "title": "施工ノウハウの標準化を進め、担当者が代わっても品質が落ちない状態にする",
+      "description": "個人の勘に依存している手順を文書・動画に落とし、若手が独力で辿れるようにする。",
+      "target_metric": "主要工種5件の手順書を整備／若手2名が独力で施工図を作成できる",
+      "created_by": "33333333-3333-4333-8333-333333333333",
+      "created_at": "2026-08-09T09:00:00.000Z",
+      "updated_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "company_holidays": [
+    {
+      "holiday_on": "2026-08-11",
+      "label": "山の日",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "holiday_on": "2026-09-21",
+      "label": "敬老の日",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "holiday_on": "2026-09-22",
+      "label": "秋分の日",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "personal_leaves": [
+    {
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "leave_on": "2026-08-07",
+      "kind": "paid_leave",
+      "source": "manual",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    },
+    {
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "leave_on": "2026-08-13",
+      "kind": "paid_leave",
+      "source": "manual",
+      "created_at": "2026-08-09T09:00:00.000Z"
+    }
+  ],
+  "job_grade_weights": [
+    {
+      "job_grade": "director",
+      "quantitative": 0,
+      "behavioral": 0.5,
+      "development": 0.5
+    },
+    {
+      "job_grade": "bucho",
+      "quantitative": 0.5,
+      "behavioral": 0.1,
+      "development": 0.4
+    },
+    {
+      "job_grade": "kacho",
+      "quantitative": 0.4,
+      "behavioral": 0.3,
+      "development": 0.3
+    },
+    {
+      "job_grade": "kakaricho",
+      "quantitative": 0.3,
+      "behavioral": 0.5,
+      "development": 0.2
+    },
+    {
+      "job_grade": "shunin",
+      "quantitative": 0.2,
+      "behavioral": 0.7,
+      "development": 0.1
+    },
+    {
+      "job_grade": "ippan",
+      "quantitative": 0.1,
+      "behavioral": 0.8,
+      "development": 0.1
+    }
+  ],
+  "behavior_guidelines": [
+    {
+      "id": "guideline-director-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "director",
+      "expected_behavior": "社内外と信頼関係を築き、調和を守る。地域との共創を推進"
+    },
+    {
+      "id": "guideline-director-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "director",
+      "expected_behavior": "地域・行政・顧客と連携し、次世代に貢献"
+    },
+    {
+      "id": "guideline-director-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "director",
+      "expected_behavior": "技術伝承体制を整え、専門性を高める"
+    },
+    {
+      "id": "guideline-director-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "director",
+      "expected_behavior": "経営課題を把握し、全社視点で推進"
+    },
+    {
+      "id": "guideline-director-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "director",
+      "expected_behavior": "倫理観を持ち、組織の信頼を守る"
+    },
+    {
+      "id": "guideline-bucho-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "bucho",
+      "expected_behavior": "社内外と信頼関係を築き、調和を守る。地域との共創を推進"
+    },
+    {
+      "id": "guideline-bucho-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "bucho",
+      "expected_behavior": "地域・行政・顧客と連携し、次世代に貢献"
+    },
+    {
+      "id": "guideline-bucho-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "bucho",
+      "expected_behavior": "技術伝承体制を整え、専門性を高める"
+    },
+    {
+      "id": "guideline-bucho-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "bucho",
+      "expected_behavior": "経営課題を把握し、全社視点で推進"
+    },
+    {
+      "id": "guideline-bucho-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "bucho",
+      "expected_behavior": "倫理観を持ち、組織の信頼を守る"
+    },
+    {
+      "id": "guideline-kacho-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "kacho",
+      "expected_behavior": "部門連携を促し、チームの関係性を強化"
+    },
+    {
+      "id": "guideline-kacho-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "kacho",
+      "expected_behavior": "部門改善提案を推進し、発展を担う"
+    },
+    {
+      "id": "guideline-kacho-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "kacho",
+      "expected_behavior": "専門知識を深化させ、若手を育成"
+    },
+    {
+      "id": "guideline-kacho-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "kacho",
+      "expected_behavior": "部門方針を設計し、計画的に実行"
+    },
+    {
+      "id": "guideline-kacho-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "kacho",
+      "expected_behavior": "誠実な姿勢で部下・顧客と向き合う"
+    },
+    {
+      "id": "guideline-kakaricho-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "kakaricho",
+      "expected_behavior": "職場の調整役として風通しを保つ"
+    },
+    {
+      "id": "guideline-kakaricho-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "kakaricho",
+      "expected_behavior": "担当業務内で改善を実行"
+    },
+    {
+      "id": "guideline-kakaricho-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "kakaricho",
+      "expected_behavior": "専門スキルを磨き、後輩に指導"
+    },
+    {
+      "id": "guideline-kakaricho-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "kakaricho",
+      "expected_behavior": "課の課題を捉え、改善を主導"
+    },
+    {
+      "id": "guideline-kakaricho-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "kakaricho",
+      "expected_behavior": "是正・報告を正確に行い、誠実対応"
+    },
+    {
+      "id": "guideline-shunin-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "shunin",
+      "expected_behavior": "同僚・協力業者と円滑に連携"
+    },
+    {
+      "id": "guideline-shunin-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "shunin",
+      "expected_behavior": "現場・顧客の声を改善提案に反映"
+    },
+    {
+      "id": "guideline-shunin-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "shunin",
+      "expected_behavior": "正確・丁寧に遂行し、資格取得に努める"
+    },
+    {
+      "id": "guideline-shunin-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "shunin",
+      "expected_behavior": "課題を発見し提案・実行"
+    },
+    {
+      "id": "guideline-shunin-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "shunin",
+      "expected_behavior": "約束を守り信頼を積み上げる"
+    },
+    {
+      "id": "guideline-ippan-1",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "job_grade": "ippan",
+      "expected_behavior": "仲間との協力を重視し、報連相を徹底"
+    },
+    {
+      "id": "guideline-ippan-2",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "job_grade": "ippan",
+      "expected_behavior": "日々の業務で課題意識を持つ"
+    },
+    {
+      "id": "guideline-ippan-3",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "job_grade": "ippan",
+      "expected_behavior": "知識・技術を吸収し成長する"
+    },
+    {
+      "id": "guideline-ippan-4",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "job_grade": "ippan",
+      "expected_behavior": "目標を意識して業務に取り組む"
+    },
+    {
+      "id": "guideline-ippan-5",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "job_grade": "ippan",
+      "expected_behavior": "礼儀と素直な姿勢で業務に臨む"
+    }
+  ],
+  "term_evaluations": [
+    {
+      "id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "stage": "final",
+      "status": "approved",
+      "job_grade": "ippan",
+      "overall_self_comment": "期首に立てた目標のうち、動画研修教材と採用パンフレットは進められました。更新マニュアルは外部要因で遅れています。",
+      "overall_manager_comment": "【よかった点】動画制作の運用体制を自ら構築し、期末までの見通しを立てられた点を評価します。【さらに成長するためのポイント】数値目標の未達については、早い段階で相談してもらえるとより良い結果につながります。",
+      "submitted_for_approval_at": "2026-07-03T02:00:00.000Z",
+      "approver_id": "44444444-4444-4444-8444-444444444444",
+      "approved_at": "2026-07-04T01:00:00.000Z",
+      "disclosed_at": null,
+      "final_snapshot": null,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-07-04T01:00:00.000Z"
+    },
+    {
+      "id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "user_id": "22222222-2222-4222-8222-222222222222",
+      "period_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "stage": "final",
+      "status": "pending_approval",
+      "job_grade": "shunin",
+      "overall_self_comment": "若手指導は形になってきました。安全指摘の半減は未達で、原因の切り分けが次期の課題です。",
+      "overall_manager_comment": "【よかった点】指導を仕組みにまで落とし込めた点。【さらに成長するためのポイント】数値目標は途中経過の共有をもう一段細かく。",
+      "submitted_for_approval_at": "2026-07-06T01:30:00.000Z",
+      "approver_id": null,
+      "approved_at": null,
+      "disclosed_at": null,
+      "final_snapshot": null,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-07-06T01:30:00.000Z"
+    }
+  ],
+  "term_evaluation_items": [
+    {
+      "id": "term-item-1",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "quantitative",
+      "sort_order": 1,
+      "title": "研修の均質化を図るため、新入社員向け動画研修教材の素材確認をする",
+      "department_goal_id": "eeeeeeee-0000-4000-8000-000000000012",
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "施工マニュアル動画の制作に着手し、撮影から編集までの運用体制を構築して順次作成を進めています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-2",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "quantitative",
+      "sort_order": 2,
+      "title": "採用パンフレットのデザインから入稿データ作成までを完了させる",
+      "department_goal_id": "eeeeeeee-0000-4000-8000-000000000011",
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "印刷会社の要件に合わせた入稿データの仕様調整を担当し、手配まで滞りなく進めました。",
+      "self_score": 3,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-3",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "quantitative",
+      "sort_order": 3,
+      "title": "コーポレートサイト・採用サイトの更新マニュアルの作成",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "委託先でのサイト制作が未完了のため保留中です。納品後すぐ着手できるよう準備しています。",
+      "self_score": 3,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-4",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "behavioral",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "仲間との協力を重視し、報連相を徹底",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "式典の制作業務で営業課と密に連携し、仕様や進行の報連相を徹底しました。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-5",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "behavioral",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "日々の業務で課題意識を持つ",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "社内の業務効率化という課題に対し、AI活用の取り組みをチームで推進しています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-6",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "behavioral",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "department_goal_id": null,
+      "expected_behavior": "知識・技術を吸収し成長する",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "二等無人航空機操縦士の学科試験に合格しました。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-7",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "behavioral",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "目標を意識して業務に取り組む",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "動画制作の運用体制を自ら構築し、スケジュールを意識して進めています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-8",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "behavioral",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "department_goal_id": null,
+      "expected_behavior": "礼儀と素直な姿勢で業務に臨む",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "目標未達の現状を真摯に受け止め、原因分析と改善に取り組んでいます。",
+      "self_score": 3,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-9",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "development",
+      "sort_order": 1,
+      "title": "Instagramを各月4回更新し、フォロワー増加を目指す",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "月4回の投稿を継続しましたが、フォロワー数は目標に届きませんでした。",
+      "self_score": 3,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-item-10",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "category": "development",
+      "sort_order": 2,
+      "title": "二等無人航空機操縦士の学科試験を受験し、合格する",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "計画どおり学習を進め、6月に受験・合格しました。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-1",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "quantitative",
+      "sort_order": 1,
+      "title": "若手2名の施工図作成を指導し、独力で仕上げられる状態にする",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "週1回のレビューを継続し、2名とも簡易な図面は独力で作成できるようになりました。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-2",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "quantitative",
+      "sort_order": 2,
+      "title": "現場Bの安全パトロール指摘件数を前期比で半減させる",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "指摘は前期24件から15件に減少。半減には届きませんでした。",
+      "self_score": 3,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-3",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "behavioral",
+      "sort_order": 1,
+      "title": "①地域・仲間との和に寄り添う存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "同僚・協力業者と円滑に連携",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "協力業者との定例を設け、認識のずれを早めに潰すようにしました。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-4",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "behavioral",
+      "sort_order": 2,
+      "title": "②地域社会の未来を想像し、創造する存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "現場・顧客の声を改善提案に反映",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "現場から出た改善案を月次でまとめ、課内に共有しています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-5",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "behavioral",
+      "sort_order": 3,
+      "title": "③技術を磨くプロフェッショナルであれ",
+      "department_goal_id": null,
+      "expected_behavior": "正確・丁寧に遂行し、資格取得に努める",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "1級の学科に合格し、後輩への説明にも使えるようになりました。",
+      "self_score": 5,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-6",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "behavioral",
+      "sort_order": 4,
+      "title": "④主体的にものごとを捉え、推進できる存在であれ",
+      "department_goal_id": null,
+      "expected_behavior": "課題を発見し提案・実行",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "指示待ちにならないよう、着工前に課題を洗い出して提案しています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-7",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "behavioral",
+      "sort_order": 5,
+      "title": "⑤常に誠実であれ",
+      "department_goal_id": null,
+      "expected_behavior": "約束を守り信頼を積み上げる",
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "できない約束はせず、遅れそうな時は早めに相談するようにしています。",
+      "self_score": 4,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "term-suzuki-8",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "category": "development",
+      "sort_order": 1,
+      "title": "1級土木施工管理技士の一次検定に合格する",
+      "department_goal_id": null,
+      "expected_behavior": null,
+      "midterm_progress": null,
+      "midterm_self_score": null,
+      "self_comment": "6月の一次検定に合格しました。二次は下期に受験します。",
+      "self_score": 5,
+      "created_at": "2026-01-05T00:00:00.000Z",
+      "updated_at": "2026-06-30T00:00:00.000Z"
+    }
+  ],
+  "term_evaluation_marks": [
+    {
+      "item_id": "term-item-1",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "体制構築は評価できます。完成時期の見通しを早めに共有してください。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-2",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "予定どおり完了しました。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-3",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "外部要因ですが、先に着手できる範囲の切り出しは可能だったと思います。",
+      "manager_score": 2,
+      "final_score": 2,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-4",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "部署をまたぐ調整をよく担ってくれました。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-5",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "現状に満足せず改善を提案する姿勢が続いています。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-6",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "業務に直結する資格を自発的に取得しました。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-7",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "主体性は十分。優先順位の判断は上長と擦り合わせましょう。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-8",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "未達を隠さず報告した点を評価します。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-9",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "継続はできています。効果測定の設計が次の課題です。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-item-10",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000001",
+      "manager_comment": "計画的に達成しました。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-1",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "指導の仕組み化まで進めてくれました。次は難易度の高い図面へ。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-2",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "改善傾向は明確です。残る指摘の傾向分析を次期の目標に。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-3",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "現場の空気が良くなりました。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-4",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "提案が具体的で助かっています。",
+      "manager_score": 3,
+      "final_score": 3,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-5",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "学んだことを周りに還元できています。",
+      "manager_score": 5,
+      "final_score": 5,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-6",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "先回りの動きが増えました。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-7",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "報告が早く、安心して任せられます。",
+      "manager_score": 4,
+      "final_score": 4,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    },
+    {
+      "item_id": "term-suzuki-8",
+      "term_evaluation_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "manager_comment": "計画的に学習を進め、一発合格しました。",
+      "manager_score": 5,
+      "final_score": 5,
+      "created_at": "2026-07-03T00:00:00.000Z",
+      "updated_at": "2026-07-03T00:00:00.000Z"
+    }
+  ]
+}

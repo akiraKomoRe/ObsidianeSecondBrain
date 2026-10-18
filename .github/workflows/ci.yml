@@ -8,6 +8,9 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: INBOX/人事評価システム/システム
     steps:
       - uses: actions/checkout@v4
 
@@ -15,6 +18,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: INBOX/人事評価システム/システム/package-lock.json
 
       - run: npm ci
 
